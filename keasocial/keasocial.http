@@ -1,0 +1,6 @@
+@keasocial_HostAddress = http://localhost:5260
+
+GET {{keasocial_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
