@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace keasocial.Models
 {
-    public class SocialMediaContext : DbContext
+    public class KeasocialDbContext : DbContext
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Post> Posts { get; set; }
@@ -12,11 +12,7 @@ namespace keasocial.Models
         public DbSet<CommentLike> CommentLikes { get; set; }
         public DbSet<PostLike> PostLikes { get; set; }
 
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql("Host=localhost;Database=keasocial_db;Username=lasse;Password=1234");
-
-        }
+        public KeasocialDbContext(DbContextOptions<KeasocialDbContext> options)
+            : base(options) {}
     }
 }
