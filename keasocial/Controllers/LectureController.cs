@@ -22,7 +22,7 @@ public class LectureController : ControllerBase
         return Ok(lectures);
     }
 
-    [HttpGet("/{id}")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<List<Lecture>>> Get(int id)
     {
         var lecture = await _lectureService.GetAsync(id);
