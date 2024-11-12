@@ -16,15 +16,17 @@ public class LectureController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<List<Lecture>> Get()
+    public async Task<ActionResult<Lecture>> Get()
     {
-        return await _lectureService.GetAsync();
+        var lectures = await _lectureService.GetAsync();
+        return Ok(lectures);
     }
 
     [HttpGet("/{id}")]
-    public async Task<Lecture> Get(int id)
+    public async Task<ActionResult<List<Lecture>>> Get(int id)
     {
-        return await _lectureService.GetAsync(id);
+        var lecture = await _lectureService.GetAsync(id);
+        return Ok(lecture);
     }
     
 }

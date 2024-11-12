@@ -16,15 +16,17 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<List<User>> Get()
+    public async Task<ActionResult<User>> Get()
     {
-        return await _userService.GetAsync();
+        var users = await _userService.GetAsync();
+        return Ok(users);
     }
     
     [HttpGet("${userId}")]
-    public async Task<User> Get(int userId)
+    public async Task<ActionResult<List<User>>> Get(int userId)
     {
-        return await _userService.GetAsync(userId);
+        var user = await _userService.GetAsync(userId);
+        return Ok(user);
     }
     
     
