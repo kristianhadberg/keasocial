@@ -1,5 +1,6 @@
 using keasocial.Models;
 using keasocial.Repositories;
+using keasocial.Repositories.Interfaces;
 using keasocial.Services;
 using keasocial.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,10 @@ builder.Services.AddDbContext<KeasocialDbContext>(options =>
  */
 builder.Services.AddControllers();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ILectureService, LectureService>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ILectureRepository, LectureRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

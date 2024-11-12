@@ -1,5 +1,6 @@
 using keasocial.Models;
 using keasocial.Repositories;
+using keasocial.Repositories.Interfaces;
 using keasocial.Services.Interfaces;
 
 namespace keasocial.Services;

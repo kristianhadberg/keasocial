@@ -1,6 +1,6 @@
 using keasocial.Models;
 
-namespace keasocial.Repositories;
+namespace keasocial.Repositories.Interfaces;
 
 public interface IUserRepository
 {
