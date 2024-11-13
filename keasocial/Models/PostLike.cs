@@ -7,8 +7,8 @@ public class PostLike
     public int PostId { get; set; }
 
     // Navigation properties
-    public User User { get; set; }
-    public Post Post { get; set; }
+    public User? User { get; set; }
+    public Post? Post { get; set; }
 }
     
 

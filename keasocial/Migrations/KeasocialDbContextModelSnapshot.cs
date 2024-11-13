@@ -2,8 +2,8 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using keasocial.Models;
 
 #nullable disable
@@ -18,23 +18,38 @@ namespace keasocial.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.8")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("CalendarLecture", b =>
+                {
+                    b.Property<int>("CalendarsCalendarId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LecturesLectureId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CalendarsCalendarId", "LecturesLectureId");
+
+                    b.HasIndex("LecturesLectureId");
+
+                    b.ToTable("CalendarLecture");
+                });
 
             modelBuilder.Entity("keasocial.Models.Calendar", b =>
                 {
                     b.Property<int>("CalendarId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CalendarId"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("CalendarId"));
 
                     b.Property<bool>("IsPublic")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("CalendarId");
 
@@ -48,25 +63,25 @@ namespace keasocial.Migrations
                 {
                     b.Property<int>("CommentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CommentId"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("CommentId"));
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("LikeCount")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("PostId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("CommentId");
 
@@ -81,15 +96,15 @@ namespace keasocial.Migrations
                 {
                     b.Property<int>("CommentLikeId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CommentLikeId"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("CommentLikeId"));
 
                     b.Property<int>("CommentId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("CommentLikeId");
 
@@ -104,30 +119,25 @@ namespace keasocial.Migrations
                 {
                     b.Property<int>("LectureId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("LectureId"));
-
-                    b.Property<int?>("CalendarId")
-                        .HasColumnType("integer");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("LectureId"));
 
                     b.Property<DateTime>("LectureDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("LectureDescription")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<TimeSpan>("LectureTime")
-                        .HasColumnType("interval");
+                        .HasColumnType("time(6)");
 
                     b.Property<string>("LectureTitle")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("LectureId");
-
-                    b.HasIndex("CalendarId");
 
                     b.ToTable("Lectures");
                 });
@@ -136,22 +146,22 @@ namespace keasocial.Migrations
                 {
                     b.Property<int>("PostId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PostId"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("PostId"));
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("LikeCount")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("PostId");
 
@@ -164,15 +174,15 @@ namespace keasocial.Migrations
                 {
                     b.Property<int>("PostLikeId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PostLikeId"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("PostLikeId"));
 
                     b.Property<int>("PostId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("PostLikeId");
 
@@ -187,25 +197,40 @@ namespace keasocial.Migrations
                 {
                     b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("UserId"));
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("CalendarLecture", b =>
+                {
+                    b.HasOne("keasocial.Models.Calendar", null)
+                        .WithMany()
+                        .HasForeignKey("CalendarsCalendarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("keasocial.Models.Lecture", null)
+                        .WithMany()
+                        .HasForeignKey("LecturesLectureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("keasocial.Models.Calendar", b =>
@@ -257,13 +282,6 @@ namespace keasocial.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("keasocial.Models.Lecture", b =>
-                {
-                    b.HasOne("keasocial.Models.Calendar", null)
-                        .WithMany("Lectures")
-                        .HasForeignKey("CalendarId");
-                });
-
             modelBuilder.Entity("keasocial.Models.Post", b =>
                 {
                     b.HasOne("keasocial.Models.User", "User")
@@ -292,11 +310,6 @@ namespace keasocial.Migrations
                     b.Navigation("Post");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("keasocial.Models.Calendar", b =>
-                {
-                    b.Navigation("Lectures");
                 });
 
             modelBuilder.Entity("keasocial.Models.Comment", b =>
