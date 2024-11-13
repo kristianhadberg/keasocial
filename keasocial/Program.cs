@@ -1,3 +1,4 @@
+using System.Configuration;
 using keasocial.Models;
 using keasocial.Repositories;
 using keasocial.Repositories.Interfaces;
@@ -10,7 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Context
 builder.Services.AddDbContext<KeasocialDbContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+        new MySqlServerVersion(new Version(9, 1, 0)));
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
