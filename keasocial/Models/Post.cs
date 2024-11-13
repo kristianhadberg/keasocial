@@ -6,7 +6,7 @@ public class Post
     public int UserId { get; set; }
     public string Content { get; set; }
     public DateTime CreatedAt { get; set; }
-    public int LikeCount { get; set; }
+    public int LikeCount {get; set; }
 
     // Navigation properties
     public User User { get; set; }

@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS "PostLikes" (
 INSERT INTO "PostLikes" ("PostId", "UserId") VALUES
                                            (1, 2), 
                                            (2, 3), 
-                                           (3, 4), 
+                                           (3, 4); 
 
 
 UPDATE "Posts" SET "LikeCount" = (SELECT COUNT(*) FROM "PostLikes" WHERE "PostLikes"."PostId" = "Posts"."PostId");
