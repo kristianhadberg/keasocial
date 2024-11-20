@@ -1,4 +1,5 @@
 using System.Configuration;
+using keasocial.ErrorHandling;
 using keasocial.Models;
 using keasocial.Repositories;
 using keasocial.Repositories.Interfaces;
@@ -41,6 +42,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
