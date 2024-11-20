@@ -38,7 +38,7 @@ public class PostService : IPostService
         {
             UserId = postCreateDto.UserId,
             Content = postCreateDto.Content,
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
             LikeCount = postCreateDto.LikeCount,
             
         };
