@@ -6,7 +6,7 @@ namespace keasocial.Services.Interfaces;
 public interface IPostService
 {
     Task<Post> GetAsync(int id);
-    Task<List<Post>> GetAsync();
+    Task<List<PostDto>> GetAsync();
     
     Task<Post> CreateAsync(PostCreateDto postCreate);
     

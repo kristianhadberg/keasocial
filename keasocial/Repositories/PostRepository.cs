@@ -19,9 +19,24 @@ public class PostRepository : IPostRepository
         return await _keasocialDbContext.Posts.FindAsync(id);
     }
 
-    public async Task<List<Post>> GetAsync()
+    public async Task<List<PostDto>> GetAsync()
     {
-        return await _keasocialDbContext.Posts.ToListAsync();
+        var posts = await _keasocialDbContext.Posts
+            .Include(p => p.Comments)
+                .ThenInclude(c => c.CommentLikes)
+            .ToListAsync();
+
+        var postDtos = posts.Select(post => new PostDto
+        {
+            PostId = post.PostId,
+            UserId = post.UserId,
+            Content = post.Content,
+            CreatedAt = post.CreatedAt,
+            LikeCount = post.LikeCount,
+            Comments = post.Comments.Select(CommentToDto).ToList()
+        }).ToList();
+
+        return postDtos;
     }
     
     public async Task<Post> CreateAsync(Post post)
@@ -45,5 +60,30 @@ public class PostRepository : IPostRepository
         _keasocialDbContext.Posts.Remove(post);
         await _keasocialDbContext.SaveChangesAsync();
         return post;
+    }
+    
+    
+    private CommentDto CommentToDto(Comment comment)
+    {
+        return new CommentDto
+        {
+            CommentId = comment.CommentId,
+            UserId = comment.UserId,
+            PostId = comment.PostId,
+            Content = comment.Content,
+            CreatedAt = comment.CreatedAt,
+            LikeCount = comment.LikeCount,
+            CommentLikes = comment.CommentLikes.Select(CommentLikeToDto).ToList()
+        };
+    }
+    
+    private CommentLikeDto CommentLikeToDto(CommentLike commentLike)
+    {
+        return new CommentLikeDto
+        {
+            CommentLikeId = commentLike.CommentLikeId,
+            UserId = commentLike.UserId,
+            CommentId = commentLike.CommentId
+        };
     }
 }

@@ -20,7 +20,7 @@ public class PostService : IPostService
         return await _postRepository.GetAsync(id);
     }
 
-    public async Task<List<Post>> GetAsync()
+    public async Task<List<PostDto>> GetAsync()
     {
         return await _postRepository.GetAsync();
     }
