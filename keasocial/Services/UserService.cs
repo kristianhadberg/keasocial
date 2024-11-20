@@ -59,6 +59,22 @@ public class UserService : IUserService
         return await _userRepository.Create(user);
     }
 
+    /*
+     * Login is very simple at the moment (non-existent)
+     * JWT needs to be added
+     */
+    public async Task<User> Login(LoginDto loginDto)
+    {
+        var user = await _userRepository.Login(loginDto);
+
+        if (user == null || user.Password != loginDto.Password)
+        {
+            throw new ArgumentException("Invalid username or password.");
+        }
+        
+        return user;
+    }
+
     private bool IsValid(string email)
     {
         return new EmailAddressAttribute().IsValid(email);
