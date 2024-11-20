@@ -30,12 +30,18 @@ public class UserController : ControllerBase
         return Ok(user);
     }
 
-    [HttpPost]
+    [HttpPost("register")]
     public async Task<ActionResult<User>> Post([FromBody]UserCreateDto userCreateDto)
     {
         var newUser = await _userService.Create(userCreateDto);
         return CreatedAtAction(nameof(Get), new { id = newUser.UserId }, newUser);
     }
-    
+
+    [HttpPost("login")]
+    public async Task<ActionResult<User>> Post([FromBody] LoginDto loginDto)
+    {
+        var user = await _userService.Login(loginDto);
+        return Ok(user);
+    }
     
 }

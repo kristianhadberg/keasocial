@@ -1,3 +1,4 @@
+using keasocial.Dto;
 using keasocial.Models;
 using keasocial.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -34,5 +35,10 @@ public class UserRepository : IUserRepository
     public async Task<User> GetByEmailAsync(string email)
     {
         return await _keasocialDbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+    }
+
+    public async Task<User> Login(LoginDto loginDto)
+    {
+        return await _keasocialDbContext.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
     }
 }

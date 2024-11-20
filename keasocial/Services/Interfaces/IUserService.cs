@@ -8,4 +8,5 @@ public interface IUserService
     Task<User> GetAsync(int id);
     Task<List<User>> GetAsync();
     Task<User> Create(UserCreateDto userCreateDto);
+    Task<User> Login(LoginDto loginDto);
 }
