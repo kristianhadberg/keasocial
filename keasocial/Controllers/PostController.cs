@@ -42,10 +42,13 @@ public class PostController : ControllerBase
         return Ok(createdPost);
     }
     
+    [Authorize]
     [HttpPut("{id}")]
     public async Task<ActionResult<Post>> Put(int id, [FromBody] PostUpdateDto postCreate)
     {
-        var updatedPost = await _postService.UpdateAsync(id, postCreate);
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+        var updatedPost = await _postService.UpdateAsync(id, postCreate, userId);
         return Ok(updatedPost);
     }
     

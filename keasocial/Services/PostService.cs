@@ -47,7 +47,7 @@ public class PostService : IPostService
 
     }
     
-    public async Task<Post> UpdateAsync(int id, PostUpdateDto postUpdateDto)
+    public async Task<Post> UpdateAsync(int id, PostUpdateDto postUpdateDto, int userId)
     {
         
         if (string.IsNullOrWhiteSpace(postUpdateDto.Content) || postUpdateDto.Content.Length < 5 || postUpdateDto.Content.Length > 100)
@@ -61,6 +61,12 @@ public class PostService : IPostService
         {
             throw new KeyNotFoundException($"Post with ID {id} not found.");
         }
+        
+        if (post.UserId != userId)
+        {
+            throw new UnauthorizedAccessException("You are not authorized to update this post.");
+        }
+        
         post.Content = postUpdateDto.Content;
         post.LikeCount = postUpdateDto.LikeCount;
         var updatedPost = await _postRepository.UpdateAsync(id, post);

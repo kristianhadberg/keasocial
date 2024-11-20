@@ -10,7 +10,7 @@ public interface IPostService
     
     Task<Post> CreateAsync(PostCreateDto postCreate);
     
-    Task<Post> UpdateAsync(int id, PostUpdateDto postCreate);
+    Task<Post> UpdateAsync(int id, PostUpdateDto postCreate, int userId);
     
     Task<Post> DeleteAsync(int userId, int postId);
     Task<bool> AddPostLikeAsync(int userId, int postId);
