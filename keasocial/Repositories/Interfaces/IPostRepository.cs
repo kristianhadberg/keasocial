@@ -12,6 +12,7 @@ public interface IPostRepository
     Task<Post> CreateAsync(Post post);
     
     Task<Post> DeleteAsync(int id);
-    
-    
+    Task<bool> AddPostLikeAsync(int userId, int postId);
+
+
 }

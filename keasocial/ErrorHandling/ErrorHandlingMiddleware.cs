@@ -29,6 +29,7 @@ public class ErrorHandlingMiddleware
         var code = exception switch
         {
             ArgumentException => HttpStatusCode.BadRequest,
+            KeyNotFoundException => HttpStatusCode.NotFound,
             _ => HttpStatusCode.InternalServerError
         };
         

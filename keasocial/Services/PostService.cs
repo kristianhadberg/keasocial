@@ -3,6 +3,7 @@ using keasocial.Models;
 using keasocial.Dto;
 using keasocial.Repositories.Interfaces;
 using keasocial.Services.Interfaces;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace keasocial.Services;
 
@@ -69,5 +70,24 @@ public class PostService : IPostService
     public async Task<Post> DeleteAsync(int id)
     {
         return await _postRepository.DeleteAsync(id);
+    }
+
+    public async Task<bool> AddPostLikeAsync(int userId, int postId)
+    {
+        var postExists = await _postRepository.GetAsync(postId);
+
+        if (postExists == null)
+        {
+            throw new KeyNotFoundException($"Post with id: {postId} does not exist.");
+        }
+        
+        var success = await _postRepository.AddPostLikeAsync(userId, postId);
+
+        if (!success)
+        {
+            throw new BadHttpRequestException("You have already liked this post.");
+        }
+
+        return true;
     }
 }

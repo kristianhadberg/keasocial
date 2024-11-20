@@ -74,7 +74,7 @@ public class UserService : IUserService
             throw new ArgumentException("Invalid username or password.");
         }
 
-        var token = _jwtService.GenerateToken(loginRequestDto.Email);
+        var token = _jwtService.GenerateToken(user.Email, user.UserId);
 
         var loginResponse = new LoginResponseDto
         {

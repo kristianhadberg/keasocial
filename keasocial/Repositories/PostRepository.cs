@@ -61,8 +61,30 @@ public class PostRepository : IPostRepository
         await _keasocialDbContext.SaveChangesAsync();
         return post;
     }
-    
-    
+
+    public async Task<bool> AddPostLikeAsync(int userId, int postId)
+    {
+        var existingLike =
+            await _keasocialDbContext.PostLikes.FirstOrDefaultAsync(pl => pl.UserId == userId && pl.PostId == postId);
+
+        if (existingLike != null)
+        {
+            return false;
+        }
+
+        var postLike = new PostLike
+        {
+            UserId = userId,
+            PostId = postId
+        };
+
+        await _keasocialDbContext.PostLikes.AddAsync(postLike);
+        await _keasocialDbContext.SaveChangesAsync();
+
+        return true;
+    }
+
+
     private CommentDto CommentToDto(Comment comment)
     {
         return new CommentDto

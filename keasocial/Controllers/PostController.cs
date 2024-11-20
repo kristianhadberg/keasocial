@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using keasocial.Dto;
 using keasocial.Models;
 using keasocial.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace keasocial.Controllers;
@@ -52,5 +54,15 @@ public class PostController : ControllerBase
     {
         await _postService.DeleteAsync(id);
         return Ok();
+    }
+
+    [Authorize]
+    [HttpPost("like/{postId}")]
+    public async Task<ActionResult> Post(int postId)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        await _postService.AddPostLikeAsync(userId, postId);
+        
+        return Ok("Post liked successfully.");
     }
 }
