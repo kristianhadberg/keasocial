@@ -49,11 +49,14 @@ public class PostController : ControllerBase
         return Ok(updatedPost);
     }
     
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    [Authorize]
+    [HttpDelete("{postId}")]
+    public async Task<ActionResult> Delete(int postId)
     {
-        await _postService.DeleteAsync(id);
-        return Ok();
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        
+        await _postService.DeleteAsync(userId, postId);
+        return Ok("Post deleted successfully.");
     }
 
     [Authorize]

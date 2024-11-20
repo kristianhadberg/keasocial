@@ -67,9 +67,21 @@ public class PostService : IPostService
         return updatedPost;
     }
     
-    public async Task<Post> DeleteAsync(int id)
+    public async Task<Post> DeleteAsync(int userId, int postId)
     {
-        return await _postRepository.DeleteAsync(id);
+        var post = await _postRepository.GetAsync(postId);
+
+        if (post == null)
+        {
+            throw new KeyNotFoundException($"Post with id: {postId} does not exist.");
+        }
+
+        if (post.UserId != userId)
+        {
+            throw new UnauthorizedAccessException("You are not authorized to delete this post.");
+        }
+        
+        return await _postRepository.DeleteAsync(postId);
     }
 
     public async Task<bool> AddPostLikeAsync(int userId, int postId)
