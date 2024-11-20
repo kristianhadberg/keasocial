@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using keasocial.Dto;
 using keasocial.Models;
-using keasocial.Repositories;
 using keasocial.Repositories.Interfaces;
+using keasocial.Security;
 using keasocial.Services.Interfaces;
 
 namespace keasocial.Services;
@@ -10,10 +10,12 @@ namespace keasocial.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly JwtService _jwtService;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository, JwtService jwtService)
     {
         _userRepository = userRepository;
+        _jwtService = jwtService;
     }
 
     public async Task<User> GetAsync(int id)
@@ -63,16 +65,25 @@ public class UserService : IUserService
      * Login is very simple at the moment (non-existent)
      * JWT needs to be added
      */
-    public async Task<User> Login(LoginDto loginDto)
+    public async Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
     {
-        var user = await _userRepository.Login(loginDto);
+        var user = await _userRepository.Login(loginRequestDto);
 
-        if (user == null || user.Password != loginDto.Password)
+        if (user == null || user.Password != loginRequestDto.Password)
         {
             throw new ArgumentException("Invalid username or password.");
         }
+
+        var token = _jwtService.GenerateToken(loginRequestDto.Email);
+
+        var loginResponse = new LoginResponseDto
+        {
+            Name = user.Name,
+            Email = user.Email,
+            Token = token
+        };
         
-        return user;
+        return loginResponse;
     }
 
     private bool IsValid(string email)

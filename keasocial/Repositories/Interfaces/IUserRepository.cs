@@ -9,5 +9,5 @@ public interface IUserRepository
     Task<List<User>> GetAsync();
     Task<User> Create(User user);
     Task<User> GetByEmailAsync(string email);
-    Task<User> Login(LoginDto loginDto);
+    Task<User> Login(LoginRequestDto loginRequestDto);
 }

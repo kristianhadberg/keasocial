@@ -1,6 +1,7 @@
 using keasocial.Dto;
 using keasocial.Models;
 using keasocial.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace keasocial.Controllers;
@@ -15,7 +16,7 @@ public class LectureController : ControllerBase
     {
         _lectureService = lectureService;
     }
-
+    
     [HttpGet]
     public async Task<ActionResult<Lecture>> Get()
     {
@@ -30,6 +31,7 @@ public class LectureController : ControllerBase
         return Ok(lecture);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<Lecture>> Post([FromBody]LectureCreateDto lectureCreateDto)
     {

@@ -37,8 +37,8 @@ public class UserRepository : IUserRepository
         return await _keasocialDbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
     }
 
-    public async Task<User> Login(LoginDto loginDto)
+    public async Task<User> Login(LoginRequestDto loginRequestDto)
     {
-        return await _keasocialDbContext.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+        return await _keasocialDbContext.Users.FirstOrDefaultAsync(u => u.Email == loginRequestDto.Email);
     }
 }
