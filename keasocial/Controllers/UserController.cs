@@ -1,3 +1,4 @@
+using keasocial.Dto;
 using keasocial.Models;
 using keasocial.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,13 @@ public class UserController : ControllerBase
     {
         var user = await _userService.GetAsync(userId);
         return Ok(user);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<User>> Post([FromBody]UserCreateDto userCreateDto)
+    {
+        var newUser = await _userService.Create(userCreateDto);
+        return CreatedAtAction(nameof(Get), new { id = newUser.UserId }, newUser);
     }
     
     

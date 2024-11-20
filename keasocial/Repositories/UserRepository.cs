@@ -22,4 +22,17 @@ public class UserRepository : IUserRepository
     {
         return await _keasocialDbContext.Users.ToListAsync();
     }
+
+    public async Task<User> Create(User user)
+    {
+        await _keasocialDbContext.Users.AddAsync(user);
+        await _keasocialDbContext.SaveChangesAsync();
+
+        return user;
+    }
+
+    public async Task<User> GetByEmailAsync(string email)
+    {
+        return await _keasocialDbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+    }
 }
