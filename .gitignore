@@ -7,6 +7,7 @@ appsettings.Development.json
 appsettings.Production.json
 appsettings.Staging.json
 config.json
+keasocial.sln.DotSettings.user
 
 ### DotnetCore ###
 # .NET Core build folders
