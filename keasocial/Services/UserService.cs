@@ -30,25 +30,12 @@ public class UserService : IUserService
 
     public async Task<User> Create(UserCreateDto userCreateDto)
     {
-        if (string.IsNullOrWhiteSpace(userCreateDto.Name) || userCreateDto.Name.Length is < 1 or > 50)
-        {
-            throw new ArgumentException("Name must be between 1 and 50 characters.");
-        }
-
-        if (!IsValid(userCreateDto.Email))
-        {
-            throw new ArgumentException("Invalid email address.");
-        }
+        ValidateUserCreateDto(userCreateDto);
         
         var existingUser = await _userRepository.GetByEmailAsync(userCreateDto.Email);
         if (existingUser != null)
         {
             throw new ArgumentException("A user with this email already exists.");
-        }
-
-        if (userCreateDto.Password.Length is < 5 or > 20)
-        {
-            throw new ArgumentException("Password must be between 5 and 20 characters.");
         }
         
         var user = new User
@@ -60,11 +47,7 @@ public class UserService : IUserService
         
         return await _userRepository.Create(user);
     }
-
-    /*
-     * Login is very simple at the moment (non-existent)
-     * JWT needs to be added
-     */
+    
     public async Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
     {
         var user = await _userRepository.Login(loginRequestDto);
@@ -86,8 +69,22 @@ public class UserService : IUserService
         return loginResponse;
     }
 
-    private bool IsValid(string email)
+    public void ValidateUserCreateDto(UserCreateDto userCreateDto)
     {
-        return new EmailAddressAttribute().IsValid(email);
+        if (string.IsNullOrWhiteSpace(userCreateDto.Name) || userCreateDto.Name.Length is < 1 or > 50)
+        {
+            throw new ArgumentException("Name must be between 1 and 50 characters.");
+        }
+        
+        if (!new EmailAddressAttribute().IsValid(userCreateDto.Email))
+        {
+            throw new ArgumentException("Invalid email address.");
+        }
+
+        if (userCreateDto.Password.Length is < 5 or > 20)
+        {
+            throw new ArgumentException("Password must be between 5 and 20 characters.");
+        }
     }
+    
 }
