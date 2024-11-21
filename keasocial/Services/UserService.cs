@@ -40,7 +40,7 @@ public class UserService : IUserService
             throw new ArgumentException("Invalid email address.");
         }
         
-        var existingUser = _userRepository.GetByEmailAsync(userCreateDto.Email);
+        var existingUser = await _userRepository.GetByEmailAsync(userCreateDto.Email);
         if (existingUser != null)
         {
             throw new ArgumentException("A user with this email already exists.");
