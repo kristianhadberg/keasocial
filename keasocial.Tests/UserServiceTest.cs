@@ -25,8 +25,13 @@ public class UserServiceTest
         
         _userService = new UserService(_userRepositoryMock.Object, jwtService);
     }
-
-    [Theory]
+    
+    /*
+     *  Maybe we can use this old test further down the line
+     *  as inspiration for integration tests 
+     */
+    
+    /*[Theory]
     [InlineData("J")]
     [InlineData("Jo")]
     [InlineData("John Geronimo Doe Johnson")]
@@ -58,5 +63,26 @@ public class UserServiceTest
         
         // Verifies that the mock repository is actually used
         _userRepositoryMock.Verify(repo => repo.GetByEmailAsync(It.IsAny<string>()), Times.Once);
+    }*/
+    
+    [Theory]
+    [InlineData("J")]
+    [InlineData("Jo")]
+    [InlineData("John Geronimo Doe Johnson")]
+    [InlineData("JimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimm")] // 49 char name
+    [InlineData("JimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmy")] // 50 char name
+    public void Test_CreateUser_Name_ShouldBe_SpecificLength(string name)
+    {
+        var userCreateDto = new UserCreateDto
+        {
+            Name = name,
+            Email = "john@example.com",
+            Password = "testpassword"
+        };
+
+        var exception = Record.Exception(() => _userService.ValidateUserCreateDto(userCreateDto));
+        
+        // Assert that no exception is thrown and therefore validation is valid.
+        Assert.Null(exception);
     }
 }
