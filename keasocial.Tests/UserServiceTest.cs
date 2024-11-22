@@ -71,6 +71,7 @@ public class UserServiceTest
     [InlineData("John Geronimo Doe Johnson")]
     [InlineData("JimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimm")] // 49 char name
     [InlineData("JimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmy")] // 50 char name
+    [InlineData("JimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyyy")] // 50 char name
     public void Test_CreateUser_Name_ShouldBe_SpecificLength(string name)
     {
         var userCreateDto = new UserCreateDto
