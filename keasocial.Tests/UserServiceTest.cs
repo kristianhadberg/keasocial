@@ -143,4 +143,45 @@ public class UserServiceTest
         
         Assert.IsType<ArgumentException>(exception);
     }
+
+    
+    /*
+     * Not sure if these tests are necessary, since its essentially testing
+     * built-in language functionality to validate emails?
+     */
+    [Theory]
+    [InlineData("test@test.com")]
+    [InlineData("test@test.dk")]
+    [InlineData("newuser@gmail.com")]
+    public void ValidateUserCreateDto_ValidEmail_ThrowsNoException(string email)
+    {
+        var userCreateDto = new UserCreateDto
+        {
+            Name = "Jimmy Doe",
+            Email = email,
+            Password = "testpassword"
+        };
+
+        var exception = Record.Exception(() => _userService.ValidateUserCreateDto(userCreateDto));
+        
+        Assert.Null(exception);
+    }
+
+    [Theory]
+    [InlineData("new@")]
+    [InlineData("myemail.com")]
+    [InlineData("myemail")]
+    public void ValidateUserCreateDto_InvalidEmail_ThrowsException(string email)
+    {
+        var userCreateDto = new UserCreateDto
+        {
+            Name = "Jimmy Doe",
+            Email = email,
+            Password = "testpassword"
+        };
+
+        var exception = Record.Exception(() => _userService.ValidateUserCreateDto(userCreateDto));
+        
+        Assert.IsType<ArgumentException>(exception);
+    }
 }
