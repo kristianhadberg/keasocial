@@ -1,5 +1,4 @@
 ﻿using keasocial.Dto;
-using keasocial.Models;
 using keasocial.Repositories.Interfaces;
 using keasocial.Security;
 using keasocial.Services;
@@ -84,5 +83,64 @@ public class UserServiceTest
         
         // Assert that no exception is thrown and therefore validation is valid.
         Assert.Null(exception);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("JimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyy")] // 51 char name
+    [InlineData("JimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyyy")] // 52 char name
+    public void ValidateUserCreateDto_TooLongName_ThrowsException(string name)
+    {
+        var userCreateDto = new UserCreateDto
+        {
+            Name = name,
+            Email = "john@example.com",
+            Password = "testpassword"
+        };
+
+        var exception = Record.Exception(() => _userService.ValidateUserCreateDto((userCreateDto)));
+
+        Assert.IsType<ArgumentException>(exception);
+    }
+
+    [Theory]
+    [InlineData("fivec")]
+    [InlineData("sixsix")]
+    [InlineData("verystrongpw")]
+    [InlineData("nineteencharacterpw")] // 19 char pw
+    [InlineData("twentycharacterpw123")] // 20 char pw
+    public void ValidateUserCreateDto_ValidPasswordLength_ThrowsNoException(string password)
+    {
+        var userCreateDto = new UserCreateDto
+        {
+            Name = "Jimmy Doe",
+            Email = "john@example.com",
+            Password = password
+        };
+
+        var exception = Record.Exception(() => _userService.ValidateUserCreateDto(userCreateDto));
+        
+        Assert.Null(exception);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("1")]
+    [InlineData("12")]
+    [InlineData("four")]
+    [InlineData("twenty1characterpw123")] // 21 char pw
+    [InlineData("twenty2characterpw1234")] // 22 char pw
+    public void ValidateUserCreateDto_InvalidPasswordLength_ThrowsArgumentException(string password)
+    {
+        var userCreateDto = new UserCreateDto
+        {
+            Name = "Jimmy Doe",
+            Email = "john@example.com",
+            Password = password
+        };
+
+        var exception = Record.Exception(() => _userService.ValidateUserCreateDto(userCreateDto));
+        
+        Assert.IsType<ArgumentException>(exception);
     }
 }
