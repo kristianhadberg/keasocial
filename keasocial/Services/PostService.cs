@@ -3,7 +3,6 @@ using keasocial.Models;
 using keasocial.Dto;
 using keasocial.Repositories.Interfaces;
 using keasocial.Services.Interfaces;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace keasocial.Services;
 
@@ -28,11 +27,7 @@ public class PostService : IPostService
     
     public async Task<Post> CreateAsync(PostCreateDto postCreateDto)
     {
-        
-        if (string.IsNullOrWhiteSpace(postCreateDto.Content) || postCreateDto.Content.Length < 5 || postCreateDto.Content.Length > 100)
-        {
-            throw new ArgumentException("Content must be between 5 and 100 characters long.");
-        }
+        ValidatePostCreateDto(postCreateDto);
         
         var post = new Post
         
@@ -46,14 +41,10 @@ public class PostService : IPostService
         return await _postRepository.CreateAsync(post);
 
     }
-    
+
     public async Task<Post> UpdateAsync(int id, PostUpdateDto postUpdateDto, int userId)
     {
-        
-        if (string.IsNullOrWhiteSpace(postUpdateDto.Content) || postUpdateDto.Content.Length < 5 || postUpdateDto.Content.Length > 100)
-        {
-            throw new ArgumentException("Content must be between 5 and 100 characters long.");
-        }
+        ValidatePostUpdateDto(postUpdateDto);
         
         Post post = await _postRepository.GetAsync(id);
         
@@ -72,7 +63,7 @@ public class PostService : IPostService
         var updatedPost = await _postRepository.UpdateAsync(id, post);
         return updatedPost;
     }
-    
+
     public async Task<Post> DeleteAsync(int userId, int postId)
     {
         var post = await _postRepository.GetAsync(postId);
@@ -107,5 +98,22 @@ public class PostService : IPostService
         }
 
         return true;
+    }
+    
+    public void ValidatePostCreateDto(PostCreateDto postCreateDto)
+    {
+        
+        if (string.IsNullOrWhiteSpace(postCreateDto.Content) || postCreateDto.Content.Length < 5 || postCreateDto.Content.Length > 100)
+        {
+            throw new ArgumentException("Content must be between 5 and 100 characters long.");
+        }
+    }
+    
+    private void ValidatePostUpdateDto(PostUpdateDto postUpdateDto)
+    {
+        if (string.IsNullOrWhiteSpace(postUpdateDto.Content) || postUpdateDto.Content.Length < 5 || postUpdateDto.Content.Length > 100)
+        {
+            throw new ArgumentException("Content must be between 5 and 100 characters long.");
+        }
     }
 }
