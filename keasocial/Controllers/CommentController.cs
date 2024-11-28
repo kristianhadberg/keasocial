@@ -9,8 +9,7 @@ namespace keasocial.Controllers;
 
 
 [ApiController]
-[Route("api/[controller]")]
-
+[Route("api/{postId}/[controller]")]
 public class CommentController : ControllerBase
 {
     private readonly ICommentService _commentService;
@@ -25,57 +24,56 @@ public class CommentController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<Comment>> Get()
+    public async Task<ActionResult<List<Comment>>> Get(int postId)
     {
-        var comments = await _commentService.GetAsync();
+        var comments = await _commentService.GetByPostIdAsync(postId);
         return Ok(comments);
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<List<Comment>>> Get(int id)
+    [HttpGet("{commentId}")]
+    public async Task<ActionResult<Comment>> Get(int postId, int commentId)
     {
-        var comment = await _commentService.GetAsync(id);
+        var comment = await _commentService.GetAsync(commentId, postId);
+        if (comment == null || comment.PostId != postId)
+        {
+            return NotFound();
+        }
         return Ok(comment);
     }
 
+    [Authorize]
     [HttpPost]
-    public async Task<ActionResult<Comment>> Create([FromBody] CommentCreateDto commentCreate)
+    public async Task<ActionResult<Comment>> Create(int postId, [FromBody] CommentCreateDto commentCreate)
     {
-        var createdComment = await _commentService.CreateAsync(commentCreate);
-        return CreatedAtAction(nameof(Get), new { id = createdComment.CommentId }, createdComment);
-        return Ok(createdComment);
+
+        var createdComment = await _commentService.CreateAsync(commentCreate, postId);
+        return CreatedAtAction(nameof(Get), new { postId, commentId = createdComment.CommentId }, createdComment);
     }
 
     [Authorize]
-    [HttpPut("{id}")]
-    public async Task<ActionResult<Comment>> Put(int id, [FromBody] CommentUpdateDto commentUpdate)
+    [HttpPut("{commentId}")]
+    public async Task<ActionResult<Comment>> Put(int postId, int commentId, [FromBody] CommentUpdateDto commentUpdate)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-
-        var updatedComment = await _commentService.UpdateAsync(id, commentUpdate, userId);
+        var updatedComment = await _commentService.UpdateAsync(commentId, commentUpdate, userId);
         return Ok(updatedComment);
     }
 
     [Authorize]
     [HttpDelete("{commentId}")]
-    public async Task<ActionResult> Delete(int commentId)
+    public async Task<ActionResult> Delete(int postId, int commentId)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-
         await _commentService.DeleteAsync(userId, commentId);
-        return Ok();
+        return Ok("Comment deleted successfully.");
     }
 
     [Authorize]
-    [HttpPost("like/{commentId}")]
-    public async Task<ActionResult> Post(int commentId)
+    [HttpPost("{commentId}/like")]
+    public async Task<ActionResult> Like(int postId, int commentId)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-        await _commentService.AddCommentLikeAsync(userId, commentId);
-        return Ok();
+        await _commentService.AddCommentLikeAsync(userId, commentId, postId);
+        return Ok("Comment liked successfully.");
     }
-
-
-
-
 }

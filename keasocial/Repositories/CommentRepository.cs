@@ -19,16 +19,30 @@ public class CommentRepository : ICommentRepository
        return await _keasocialDbContext.Comments.FindAsync(commentId);
            
     }
-
-    public Task<List<CommentDto>> GetAsync()
+    
+    public async Task<List<CommentDto>> GetAsync()
     {
-        throw new NotImplementedException();
+        return await _keasocialDbContext.Comments
+            .Select(c => new CommentDto
+            {
+                CommentId = c.CommentId,
+                PostId = c.PostId,
+                UserId = c.UserId,
+                Content = c.Content,
+                CreatedAt = c.CreatedAt,
+                LikeCount = c.LikeCount
+            })
+            .ToListAsync();
     }
 
-    public Task<IEnumerable<Comment>> GetByPostIdAsync(int postId)
+    
+    public async Task<IEnumerable<Comment>> GetByPostIdAsync(int postId)
     {
-        throw new NotImplementedException();
+        return await _keasocialDbContext.Comments
+            .Where(c => c.PostId == postId)
+            .ToListAsync();
     }
+
 
 
     public async Task<Comment> CreateAsync(Comment comment)
@@ -54,26 +68,27 @@ public class CommentRepository : ICommentRepository
         return comment; 
     }
 
-    public async Task<bool> AddCommentLikeAsync(int userId, int commentId)
+    public async Task<bool> AddCommentLikeAsync(int userId, int commentId, int postId)
     {
         var existingLike = await _keasocialDbContext.CommentLikes
             .FirstOrDefaultAsync(cl => cl.UserId == userId && cl.CommentId == commentId);
 
         if (existingLike != null)
         {
-            return false;
+            return false; 
         }
-        
+
         var commentLike = new CommentLike
         {
             UserId = userId,
             CommentId = commentId
         };
-        
+
         await _keasocialDbContext.CommentLikes.AddAsync(commentLike);
         await _keasocialDbContext.SaveChangesAsync();
-        
+
         return true;
     }
+
     
 }

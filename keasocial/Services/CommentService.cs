@@ -8,56 +8,76 @@ namespace keasocial.Services;
 public class CommentService : ICommentService
 {
     private readonly ICommentRepository _commentRepository;
+    private readonly IPostRepository _postRepository;
 
-    public CommentService(ICommentRepository commentRepository)
+    public CommentService(ICommentRepository commentRepository, IPostRepository? postRepository)
     {
         _commentRepository = commentRepository;
+        _postRepository = postRepository;
     }
     
-    public async Task<Comment> GetAsync(int id)
+    public async Task<Comment> GetAsync(int commentId, int postId)
     {
-        return await _commentRepository.GetAsync(id);
+        var comment = await _commentRepository.GetAsync(commentId);
+        if (comment == null || comment.PostId != postId)
+        {
+            throw new ArgumentException("Comment not found or does not belong to the specified post.");
+        }
+
+        return comment;
     }
+
     
+
     public async Task<List<CommentDto>> GetAsync()
     {
         return await _commentRepository.GetAsync();
     }
 
-    public Task<IEnumerable<Comment>> GetByPostIdAsync(int postId)
+    public async Task<IEnumerable<Comment>> GetByPostIdAsync(int postId)
     {
-        throw new NotImplementedException();
+        // Ensure the post exists
+        var post = await _postRepository.GetAsync(postId);
+        if (post == null)
+        {
+            throw new ArgumentException($"Post with ID {postId} does not exist.");
+        }
+
+        // Fetch and return comments
+        return await _commentRepository.GetByPostIdAsync(postId);
     }
 
-    public Task<Comment> UpdateAsync(int commentId, CommentUpdateDto comment)
-    {
-        throw new NotImplementedException();
-    }
 
-    public Task<Comment> DeleteAsync(int commentId)
+    public async Task<Comment> CreateAsync(CommentCreateDto commentCreateDto, int postId)
     {
-        throw new NotImplementedException();
-    }
-
-
-    public async Task<Comment> CreateAsync(CommentCreateDto commentCreateDto)
-    {
-        if (string.IsNullOrWhiteSpace(commentCreateDto.Content) || commentCreateDto.Content.Length < 5 || commentCreateDto.Content.Length > 200)
+        if (string.IsNullOrWhiteSpace(commentCreateDto.Content) || 
+            commentCreateDto.Content.Length < 5 || 
+            commentCreateDto.Content.Length > 200)
         {
             throw new ArgumentException("Content must be between 5 and 200 characters.");
         }
 
+        // Ensure the post exists
+        var post = await _postRepository.GetAsync(postId);
+        if (post == null)
+        {
+            throw new ArgumentException($"Post with ID {postId} does not exist.");
+        }
+
+        // Create the comment
         var comment = new Comment
         {
-            PostId = commentCreateDto.PostId,
+            PostId = postId,
             UserId = commentCreateDto.UserId,
             Content = commentCreateDto.Content,
             CreatedAt = DateTime.UtcNow,
-            LikeCount = commentCreateDto.LikeCount
+            LikeCount = 0 // Initialize LikeCount to 0
         };
 
         return await _commentRepository.CreateAsync(comment);
     }
+
+
     
     public async Task<Comment> UpdateAsync(int id, CommentUpdateDto commentUpdateDto, int userId)
     {
@@ -84,24 +104,20 @@ public class CommentService : ICommentService
         return updatedComment;
     }
     
-    public async Task<Comment> DeleteAsync(int commentId, int userId)
+    public async Task<Comment> DeleteAsync(int commentId, int postId)
     {
         var comment = await _commentRepository.GetAsync(commentId);
-        
-        if (comment == null)
+
+        if (comment == null || comment.PostId != postId)
         {
-            throw new ArgumentException($"Comment with id: {commentId} not found.");
+            throw new ArgumentException("Comment not found or does not belong to the specified post.");
         }
-        
-        if (comment.UserId != userId)
-        {
-            throw new UnauthorizedAccessException("You can only delete your own comments.");
-        }
-        
+
         return await _commentRepository.DeleteAsync(commentId);
     }
     
-    public async Task<bool> AddCommentLikeAsync(int userId, int commentId)
+
+    public async Task<bool> AddCommentLikeAsync(int userId, int commentId, int postId)
     {
         var commentExists = await _commentRepository.GetAsync(commentId);
 
@@ -110,7 +126,7 @@ public class CommentService : ICommentService
             throw new KeyNotFoundException($"Comment with ID {commentId} not found.");
         }
         
-        var success = await _commentRepository.AddCommentLikeAsync(userId, commentId);
+        var success = await _commentRepository.AddCommentLikeAsync(userId, commentId, postId);
         
         if (!success)
         {
@@ -119,9 +135,6 @@ public class CommentService : ICommentService
 
         return true;
     }
-
-
-
     public async Task<IEnumerable<Comment>> GetCommentsByPostIdAsync(int postId)
     {
         return await _commentRepository.GetByPostIdAsync(postId);
