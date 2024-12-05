@@ -14,5 +14,6 @@ public interface IPostService
     
     Task<Post> DeleteAsync(int userId, int postId);
     Task<bool> AddPostLikeAsync(int userId, int postId);
+    Task<List<PostLikeView>> GetPostLikesAsync(int postId);
 
 }

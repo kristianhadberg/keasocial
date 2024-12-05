@@ -99,7 +99,12 @@ public class PostService : IPostService
 
         return true;
     }
-    
+
+    public async Task<List<PostLikeView>> GetPostLikesAsync(int postId)
+    {
+        return await _postRepository.GetPostLikesAsync(postId);
+    }
+
     public void ValidatePostCreateDto(PostCreateDto postCreateDto)
     {
         

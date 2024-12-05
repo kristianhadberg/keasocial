@@ -1,6 +1,7 @@
+using keasocial.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace keasocial.Models
+namespace keasocial.Data
 {
     public class KeasocialDbContext : DbContext
     {
@@ -11,8 +12,18 @@ namespace keasocial.Models
         public DbSet<Comment> Comments { get; set; }
         public DbSet<CommentLike> CommentLikes { get; set; }
         public DbSet<PostLike> PostLikes { get; set; }
+        public DbSet<PostLikeView> PostLikeViews { get; set; }
 
         public KeasocialDbContext(DbContextOptions<KeasocialDbContext> options)
             : base(options) {}
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<PostLikeView>()
+                .ToView("PostLikesView")
+                .HasNoKey();
+        }
     }
 }

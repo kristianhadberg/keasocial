@@ -1,5 +1,6 @@
 using System.Configuration;
 using System.Text;
+using keasocial.Data;
 using keasocial.ErrorHandling;
 using keasocial.Models;
 using keasocial.Repositories;

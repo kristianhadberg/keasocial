@@ -62,6 +62,13 @@ public class PostController : ControllerBase
         return Ok("Post deleted successfully.");
     }
 
+    [HttpGet("like/{postId}")]
+    public async Task<ActionResult<List<PostLikeView>>> GetPostLikes(int postId)
+    {
+        var postLikeView = await _postService.GetPostLikesAsync(postId);
+        return Ok(postLikeView);
+    }
+
     [Authorize]
     [HttpPost("like/{postId}")]
     public async Task<ActionResult> Post(int postId)

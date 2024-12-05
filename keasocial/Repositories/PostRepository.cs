@@ -1,3 +1,4 @@
+using keasocial.Data;
 using keasocial.Dto;
 using keasocial.Models;
 using keasocial.Repositories.Interfaces;
@@ -82,6 +83,15 @@ public class PostRepository : IPostRepository
         await _keasocialDbContext.SaveChangesAsync();
 
         return true;
+    }
+
+    public async Task<List<PostLikeView>> GetPostLikesAsync(int postId)
+    {
+        var postLikes = await _keasocialDbContext.PostLikeViews
+            .Where(pl => pl.PostId == postId)
+            .ToListAsync();
+        
+        return postLikes;
     }
 
 
