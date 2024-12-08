@@ -24,11 +24,12 @@ public class CommentController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Comment>>> Get(int postId)
+    public async Task<ActionResult<List<CommentDto>>> Get(int postId)
     {
         var comments = await _commentService.GetByPostIdAsync(postId);
         return Ok(comments);
     }
+
 
     [HttpGet("{commentId}")]
     public async Task<ActionResult<Comment>> Get(int postId, int commentId)
@@ -43,16 +44,16 @@ public class CommentController : ControllerBase
 
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<Comment>> Create(int postId, [FromBody] CommentCreateDto commentCreate)
+    public async Task<ActionResult<CommentDto>> Create(int postId, [FromBody] CommentCreateDto commentCreate)
     {
 
         var createdComment = await _commentService.CreateAsync(commentCreate, postId);
-        return CreatedAtAction(nameof(Get), new { postId, commentId = createdComment.CommentId }, createdComment);
+        return Ok(createdComment);
     }
 
     [Authorize]
     [HttpPut("{commentId}")]
-    public async Task<ActionResult<Comment>> Put(int postId, int commentId, [FromBody] CommentUpdateDto commentUpdate)
+    public async Task<ActionResult<CommentUpdateDto>> Put(int postId, int commentId, [FromBody] CommentUpdateDto commentUpdate)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
         var updatedComment = await _commentService.UpdateAsync(commentId, commentUpdate, userId);
@@ -64,7 +65,13 @@ public class CommentController : ControllerBase
     public async Task<ActionResult> Delete(int postId, int commentId)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-        await _commentService.DeleteAsync(userId, commentId);
+        
+        if (postId == 0 || commentId == 0)
+        {
+            return BadRequest("Invalid post or comment ID.");
+        }
+        
+        await _commentService.DeleteAsync(commentId, postId, userId);
         return Ok("Comment deleted successfully.");
     }
 

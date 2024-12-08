@@ -37,21 +37,46 @@ public class CommentRepository : ICommentRepository
     }
 
     
-    public async Task<IEnumerable<Comment>> GetByPostIdAsync(int postId)
+    public async Task<IEnumerable<CommentDto>> GetByPostIdAsync(int postId)
     {
         return await _keasocialDbContext.Comments
             .Where(c => c.PostId == postId)
+            .Select(c => new CommentDto
+            {
+                CommentId = c.CommentId,
+                UserId = c.UserId,
+                PostId = c.PostId,
+                Content = c.Content,
+                CreatedAt = c.CreatedAt,
+                LikeCount = c.LikeCount,
+                CommentLikes = c.CommentLikes.Select(cl => new CommentLikeDto
+                {
+                    UserId = cl.UserId,
+                    CommentId = cl.CommentId
+                }).ToList()
+            })
             .ToListAsync();
     }
 
 
 
-    public async Task<Comment> CreateAsync(Comment comment)
+
+    public async Task<CommentDto> CreateAsync(Comment comment)
     {
         await _keasocialDbContext.Comments.AddAsync(comment);
         await _keasocialDbContext.SaveChangesAsync();
-        
-        return comment;
+
+        var commentDto = new CommentDto
+        {
+            CommentId = comment.CommentId,
+            UserId = comment.UserId,
+            PostId = comment.PostId,
+            Content = comment.Content,
+            CreatedAt = comment.CreatedAt,
+            LikeCount = comment.LikeCount,
+        };
+
+        return commentDto;
     }
 
     public async Task<Comment> UpdateAsync(int commentId, Comment comment)
