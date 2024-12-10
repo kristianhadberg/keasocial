@@ -13,4 +13,6 @@ public interface ICommentRepository
     Task <Comment> DeleteAsync(int commentId);
     
     Task<bool> AddCommentLikeAsync(int userId, int commentId, int postId);
+    Task<Comment> GetMostLikedForUserAsync(int userId);
+
 }

@@ -26,9 +26,7 @@ public class CommentService : ICommentService
 
         return comment;
     }
-
     
-
     public async Task<List<CommentDto>> GetAsync()
     {
         return await _commentRepository.GetAsync();
@@ -138,6 +136,19 @@ public class CommentService : ICommentService
 
         return true;
     }
+
+    public async Task<Comment> GetMostLikedForUserAsync(int userId)
+    {
+        var mostLikedComment = await _commentRepository.GetMostLikedForUserAsync(userId);
+
+        if (mostLikedComment == null)
+        {
+            throw new ArgumentException($"No comment found userId: {userId}");
+        }
+
+        return mostLikedComment;
+    }
+
     public async Task<IEnumerable<CommentDto>> GetCommentsByPostIdAsync(int postId)
     {
         return await _commentRepository.GetByPostIdAsync(postId);

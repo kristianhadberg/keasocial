@@ -13,5 +13,6 @@ public interface ICommentService
     Task<Comment> UpdateAsync(int commentId, CommentUpdateDto comment, int userId);
     Task<Comment> DeleteAsync(int commentId, int userId, int postId);
     Task<bool> AddCommentLikeAsync(int userId, int commentId, int postId);
-    
+    Task<Comment> GetMostLikedForUserAsync(int userId);
+
 }
