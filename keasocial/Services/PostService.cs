@@ -105,6 +105,11 @@ public class PostService : IPostService
         return await _postRepository.GetPostLikesAsync(postId);
     }
 
+    public async Task<List<PostDto>> GetMostLikedPostsAsync()
+    {
+        return await _postRepository.GetMostLikedPostsAsync();
+    }
+
     public void ValidatePostCreateDto(PostCreateDto postCreateDto)
     {
         

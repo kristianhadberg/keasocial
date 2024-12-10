@@ -94,6 +94,37 @@ public class PostRepository : IPostRepository
         return postLikes;
     }
 
+    public async Task<List<PostDto>> GetMostLikedPostsAsync()
+    {
+        // Fetch posts using stored procedure
+        var posts = await _keasocialDbContext.Posts
+            .FromSqlInterpolated($"CALL GetMostLikedPosts()")
+            .ToListAsync();
+
+        // Cant use include/theninclude from directly on the result of the procedure
+        // So instead we fetch the comments independently
+        var postIds = posts.Select(p => p.PostId).ToList();
+        var comments = await _keasocialDbContext.Comments
+            .Where(c => postIds.Contains(c.PostId))
+            .Include(c => c.CommentLikes) // Include CommentLikes
+            .ToListAsync();
+
+        var mostLikedPostDtos = posts.Select(post => new PostDto
+        {
+            PostId = post.PostId,
+            UserId = post.UserId,
+            Content = post.Content,
+            CreatedAt = post.CreatedAt,
+            LikeCount = post.LikeCount,
+            Comments = comments
+                .Where(c => c.PostId == post.PostId)
+                .Select(CommentToDto)
+                .ToList()
+        }).ToList();
+
+        return mostLikedPostDtos;
+    }
+
 
     private CommentDto CommentToDto(Comment comment)
     {

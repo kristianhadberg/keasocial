@@ -69,6 +69,13 @@ public class PostController : ControllerBase
         return Ok(postLikeView);
     }
 
+    [HttpGet("most-liked")]
+    public async Task<ActionResult<List<PostDto>>> GetMostLikedPosts()
+    {
+        var mostLikedPosts = await _postService.GetMostLikedPostsAsync();
+        return Ok(mostLikedPosts);
+    }
+
     [Authorize]
     [HttpPost("like/{postId}")]
     public async Task<ActionResult> Post(int postId)
