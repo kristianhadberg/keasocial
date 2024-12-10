@@ -101,7 +101,7 @@ public class PostRepository : IPostRepository
             .FromSqlInterpolated($"CALL GetMostLikedPosts()")
             .ToListAsync();
 
-        // Cant use include/theninclude from directly on the result of the procedure
+        // Cant use Include/ThenInclude directly on the result of the stored procedure
         // So instead we fetch the comments independently
         var postIds = posts.Select(p => p.PostId).ToList();
         var comments = await _keasocialDbContext.Comments
