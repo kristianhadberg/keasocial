@@ -11,6 +11,10 @@ namespace keasocial.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql(@"
+                DROP TABLE IF EXISTS `ArchivedLecture`;
+            ");
+            
+            migrationBuilder.Sql(@"
                     CREATE TABLE `ArchivedLecture` (
                   `ArchivedLectureId` int NOT NULL AUTO_INCREMENT,
                   `LectureTitle` longtext NOT NULL,

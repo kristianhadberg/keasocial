@@ -15,15 +15,16 @@ namespace keasocial.Migrations
         AFTER INSERT ON PostLikes
         FOR EACH ROW
         BEGIN
-            
-            SELECT CASE 
-               WHEN (SELECT COUNT(*) FROM Posts WHERE PostId = NEW.PostId) = 0 
-               THEN RAISE(FAIL, 'No matching PostId found in Posts table') 
-            END;
-            
-            UPDATE Posts
-            SET LikeCount = LikeCount + 1
-            WHERE PostId = NEW.PostId;
+            -- Ensure the PostId exists before updating
+            IF (SELECT COUNT(*) FROM Posts WHERE PostId = NEW.PostId) = 0 THEN
+                SIGNAL SQLSTATE '45000' 
+                SET MESSAGE_TEXT = 'No matching PostId found in Posts table';
+            ELSE
+                -- Increment the LikeCount for the corresponding Post
+                UPDATE Posts
+                SET LikeCount = LikeCount + 1
+                WHERE PostId = NEW.PostId;
+            END IF;
         END;
          ");
         }

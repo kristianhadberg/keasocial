@@ -253,6 +253,13 @@ namespace keasocial.Migrations
                 name: "IX_Posts_UserId",
                 table: "Posts",
                 column: "UserId");
+            
+            migrationBuilder.Sql("CREATE FULLTEXT INDEX idx_posts_content ON Posts (Content);");
+            
+            migrationBuilder.Sql("CREATE FULLTEXT INDEX idx_comments_content ON Comments (Content);");
+            
+
+
         }
 
         /// <inheritdoc />

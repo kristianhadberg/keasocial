@@ -13,14 +13,45 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
-var builder = WebApplication.CreateBuilder(args);
+using MongoDB.Driver;
 
-// Context
-builder.Services.AddDbContext<KeasocialDbContext>(options =>
+var builder = WebApplication.CreateBuilder(args);
+var useMongoDb = builder.Configuration.GetValue<bool>("DatabaseConfig:UseMongoDB");
+
+if (useMongoDb)
 {
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
-        new MySqlServerVersion(new Version(9, 1, 0)));
-});
+    // Configure MongoDB
+    var mongoConnectionString = builder.Configuration.GetSection("ConnectionStrings:MongoDB:ConnectionString").Value;
+    var mongoDatabaseName = builder.Configuration.GetSection("ConnectionStrings:MongoDB:DatabaseName").Value;
+
+    // Register MongoDB services
+    builder.Services.AddSingleton<IMongoClient>(s => new MongoClient(mongoConnectionString));
+    builder.Services.AddSingleton(s =>
+    {
+        var client = s.GetRequiredService<IMongoClient>();
+        return client.GetDatabase(mongoDatabaseName);
+    });
+
+    // Register MongoDB repositories
+    builder.Services.AddScoped<IUserRepository, MongoUserRepository>();
+    builder.Services.AddScoped<ILectureRepository, MongoLectureRepository>();
+    builder.Services.AddScoped<ICommentRepository, MongoCommentRepository>();
+    builder.Services.AddScoped<IPostRepository, MongoPostRepository>();
+}
+else
+{
+    // Configure MySQL
+    builder.Services.AddDbContext<KeasocialDbContext>(options =>
+    {
+        options.UseMySql(builder.Configuration.GetConnectionString("MySql"), new MySqlServerVersion(new Version(8, 0, 27)));
+    });
+
+    // Register MySQL repositories
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<ILectureRepository, LectureRepository>();
+    builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+    builder.Services.AddScoped<IPostRepository, PostRepository>();
+}
 
 /*
  * Services & Repositories
@@ -31,10 +62,6 @@ builder.Services.AddScoped<ILectureService, LectureService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ILectureRepository, LectureRepository>();
-builder.Services.AddScoped<IPostRepository, PostRepository>();
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddSingleton<JwtService>();
 
 // Enable EF Core logging
