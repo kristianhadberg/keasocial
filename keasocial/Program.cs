@@ -1,40 +1,32 @@
 using System.Configuration;
 using System.Text;
-using keasocial.Data;
 using keasocial.ErrorHandling;
-using keasocial.Models;
 using keasocial.Repositories;
 using keasocial.Repositories.Interfaces;
 using keasocial.Security;
 using keasocial.Services;
 using keasocial.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Neo4j.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Context
-builder.Services.AddDbContext<KeasocialDbContext>(options =>
-{
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
-        new MySqlServerVersion(new Version(9, 1, 0)));
-});
 
 /*
  * Services & Repositories
  */
 builder.Services.AddControllers();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ILectureService, LectureService>();
-builder.Services.AddScoped<IPostService, PostService>();
-builder.Services.AddScoped<ICommentService, CommentService>();
-
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+/*builder.Services.AddScoped<ILectureService, LectureService>();
+builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<ICommentService, CommentService>();*/
+
+/*builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ILectureRepository, LectureRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();*/
 builder.Services.AddSingleton<JwtService>();
 
 // Enable EF Core logging
@@ -42,16 +34,12 @@ var loggerFactory = LoggerFactory.Create(loggingBuilder =>
 {
     loggingBuilder.AddConsole(); // Log EF Core queries to the console
 });
-
-builder.Services.AddDbContext<KeasocialDbContext>(options =>
+builder.Services.AddSingleton<IDriver>(sp =>
 {
-    options.UseMySql(
-            builder.Configuration.GetConnectionString("DefaultConnection"), 
-            new MySqlServerVersion(new Version(9, 1, 0))
-        )
-        .UseLoggerFactory(loggerFactory)          // Attach logging factory
-        .EnableSensitiveDataLogging()             // Show parameter values in logs
-        .EnableDetailedErrors();                  // Provide detailed error messages
+    var uri = builder.Configuration["Neo4j:Uri"];
+    var username = builder.Configuration["Neo4j:Username"];
+    var password = builder.Configuration["Neo4j:Password"];
+    return GraphDatabase.Driver(uri, AuthTokens.Basic(username, password));
 });
 
 builder.Services.AddEndpointsApiExplorer();
