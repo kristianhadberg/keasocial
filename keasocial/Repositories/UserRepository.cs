@@ -14,55 +14,128 @@ public class UserRepository : IUserRepository
         _driver = driver;
     }
 
+    /*
+     * Perhaps ids should be removed from the user nodes entirely?
+     */
     public async Task<User> GetAsync(int id)
     {
-        await using var session = _driver.AsyncSession();
-        var query = @"
-            MATCH (u:User)
-            WHERE u.UserId = $id
-            RETURN u.UserId AS UserId, u.Name AS Name, u.Email AS Email";
+        
+        var (queryResults, _) = await _driver
+            .ExecutableQuery(@"
+                MATCH (u:User)
+                WHERE u.UserId = $id
+                RETURN u.UserId AS UserId, u.Name AS Name, u.Email AS Email")
+            .WithParameters(new { id })
+            .ExecuteAsync();
 
-        var cursor = await session.RunAsync(query, new { id });
+        var userResult = queryResults
+            .Select(
+                record => new User
+                {
+                    Name = record["Name"].As<String>(),
+                    Email = record["Email"].As<String>(),
+                })
+            .FirstOrDefault();
 
-        var record = await cursor.SingleAsync();
-
-        if (record == null)
+        if (userResult == null)
         {
             return null;
         }
 
-        return new User
-        {
-            UserId = record["UserId"].As<int>(),
-            Name = record["Name"].As<string>(),
-            Email = record["Email"].As<string>(),
-        };
+        return userResult;
     }
 
     public async Task<List<User>> GetAsync()
     {
-        /*return await _keasocialDbContext.Users.ToListAsync();*/
-        return null;
+        var (queryResults, _) = await _driver
+            .ExecutableQuery(@"
+                MATCH (u:User) RETURN u.UserId AS UserId, u.Name AS Name, u.Email AS Email")
+            .ExecuteAsync();
+
+        var userResult = queryResults
+            .Select(
+                record => new User
+                {
+                    Name = record["Name"].As<String>(),
+                    Email = record["Email"].As<String>(),
+                })
+            .ToList();
+
+        return userResult;
     }
 
     public async Task<User> Create(User user)
     {
-        /*await _keasocialDbContext.Users.AddAsync(user);
-        await _keasocialDbContext.SaveChangesAsync();
+        var (queryResults, _) = await _driver
+            .ExecutableQuery(@"
+               CREATE (u:User {Name: $name, Email: $email, Password: $password})
+               RETURN u.Name AS Name, u.Email AS Email")
+            .WithParameters(new { name = user.Name, email = user.Email, password = user.Password })
+            .ExecuteAsync();
 
-        return user;*/
-        return null;
+        return queryResults
+            .Select(
+                record => new User
+                {
+                    Name = record["Name"].As<String>(),
+                    Email = record["Email"].As<String>()
+                })
+            .Single();
     }
 
     public async Task<User> GetByEmailAsync(string email)
     {
-        /*return await _keasocialDbContext.Users.FirstOrDefaultAsync(u => u.Email == email);*/
-        return null;
+        var (queryResults, _) = await _driver
+            .ExecutableQuery(@"
+                MATCH (u:User)
+                WHERE u.Email = $email
+                RETURN u.UserId AS UserId, u.Name AS Name, u.Email AS Email")
+            .WithParameters(new { email })
+            .ExecuteAsync();
+
+        var userResult = queryResults
+            .Select(
+                record => new User
+                {
+                    Name = record["Name"].As<String>(),
+                    Email = record["Email"].As<String>(),
+                })
+            .FirstOrDefault();
+
+        if (userResult == null)
+        {
+            return null;
+        }
+
+        return userResult;
     }
 
     public async Task<User> Login(LoginRequestDto loginRequestDto)
     {
-        /*return await _keasocialDbContext.Users.FirstOrDefaultAsync(u => u.Email == loginRequestDto.Email);*/
-        return null;
+        var (queryResults, _) = await _driver
+               .ExecutableQuery(@"
+                   MATCH (u:User)
+                   WHERE u.Email = $email
+                   RETURN u.UserId AS UserId, u.Name AS Name, u.Email AS Email, u.Password AS Password")
+               .WithParameters(new { email = loginRequestDto.Email })
+               .ExecuteAsync();
+
+           var userResult = queryResults
+               .Select(
+                   record => new User
+                   {
+                       Name = record["Name"].As<String>(),
+                       Email = record["Email"].As<String>(),
+                       Password = record["Password"].As<String>()
+                   })
+               .FirstOrDefault();
+
+           if (userResult == null)
+           {
+               return null;
+           }
+
+           return userResult;
     }
+    
 }
