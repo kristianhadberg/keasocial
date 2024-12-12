@@ -1,4 +1,3 @@
-using System.Configuration;
 using System.Text;
 using keasocial.ErrorHandling;
 using keasocial.Repositories;
@@ -28,19 +27,6 @@ builder.Services.AddScoped<ILectureRepository, LectureRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();*/
 builder.Services.AddSingleton<JwtService>();
-
-// Enable EF Core logging
-var loggerFactory = LoggerFactory.Create(loggingBuilder =>
-{
-    loggingBuilder.AddConsole(); // Log EF Core queries to the console
-});
-/*builder.Services.AddSingleton<IDriver>(sp =>
-{
-    var uri = builder.Configuration["Neo4j:Uri"];
-    var username = builder.Configuration["Neo4j:Username"];
-    var password = builder.Configuration["Neo4j:Password"];
-    return GraphDatabase.Driver(uri, AuthTokens.Basic(username, password));
-});*/
 
 builder.Services.AddSingleton<IGraphClient>(provider =>
 {
