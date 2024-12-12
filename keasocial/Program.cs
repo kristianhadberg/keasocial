@@ -9,7 +9,7 @@ using keasocial.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Neo4j.Driver;
+using Neo4jClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,14 +34,23 @@ var loggerFactory = LoggerFactory.Create(loggingBuilder =>
 {
     loggingBuilder.AddConsole(); // Log EF Core queries to the console
 });
-builder.Services.AddSingleton<IDriver>(sp =>
+/*builder.Services.AddSingleton<IDriver>(sp =>
 {
     var uri = builder.Configuration["Neo4j:Uri"];
     var username = builder.Configuration["Neo4j:Username"];
     var password = builder.Configuration["Neo4j:Password"];
     return GraphDatabase.Driver(uri, AuthTokens.Basic(username, password));
-});
+});*/
 
+builder.Services.AddSingleton<IGraphClient>(provider =>
+{
+    var uri = builder.Configuration["Neo4j:Uri"];
+    var username = builder.Configuration["Neo4j:Username"];
+    var password = builder.Configuration["Neo4j:Password"];
+    var client = new BoltGraphClient(uri, username, password);
+    client.ConnectAsync().Wait();
+    return client;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {

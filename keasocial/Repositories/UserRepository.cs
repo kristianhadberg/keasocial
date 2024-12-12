@@ -2,16 +2,17 @@ using keasocial.Dto;
 using keasocial.Models;
 using keasocial.Repositories.Interfaces;
 using Neo4j.Driver;
+using Neo4jClient;
 
 namespace keasocial.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly IDriver _driver;
+    private readonly IGraphClient _graphClient;
 
-    public UserRepository(IDriver driver)
+    public UserRepository(IGraphClient graphClient)
     {
-        _driver = driver;
+        _graphClient = graphClient;
     }
 
     /*
@@ -19,123 +20,61 @@ public class UserRepository : IUserRepository
      */
     public async Task<User> GetAsync(int id)
     {
+        var query = await _graphClient.Cypher
+            .Match("(u:User)")
+            .Where((User u) => u.UserId == id)
+            .Return<User>("u")
+            .ResultsAsync;
         
-        var (queryResults, _) = await _driver
-            .ExecutableQuery(@"
-                MATCH (u:User)
-                WHERE u.UserId = $id
-                RETURN u.UserId AS UserId, u.Name AS Name, u.Email AS Email")
-            .WithParameters(new { id })
-            .ExecuteAsync();
-
-        var userResult = queryResults
-            .Select(
-                record => new User
-                {
-                    Name = record["Name"].As<String>(),
-                    Email = record["Email"].As<String>(),
-                })
-            .FirstOrDefault();
-
-        if (userResult == null)
-        {
-            return null;
-        }
-
-        return userResult;
+        return query.FirstOrDefault();
     }
 
     public async Task<List<User>> GetAsync()
     {
-        var (queryResults, _) = await _driver
-            .ExecutableQuery(@"
-                MATCH (u:User) RETURN u.UserId AS UserId, u.Name AS Name, u.Email AS Email")
-            .ExecuteAsync();
+        var users = await _graphClient.Cypher
+            .Match("(u:User)")
+            .Return<User>("u")
+            .ResultsAsync;
 
-        var userResult = queryResults
-            .Select(
-                record => new User
-                {
-                    Name = record["Name"].As<String>(),
-                    Email = record["Email"].As<String>(),
-                })
-            .ToList();
-
-        return userResult;
+        return users.ToList();
     }
 
     public async Task<User> Create(User user)
     {
-        var (queryResults, _) = await _driver
-            .ExecutableQuery(@"
-               CREATE (u:User {Name: $name, Email: $email, Password: $password})
-               RETURN u.Name AS Name, u.Email AS Email")
-            .WithParameters(new { name = user.Name, email = user.Email, password = user.Password })
-            .ExecuteAsync();
+        var newUser = await _graphClient.Cypher
+            .Create("(u:User {Name: $name, Email: $email, Password: $password})")
+            .WithParams(new
+            {
+                name = user.Name,
+                email = user.Email,
+                password = user.Password
+            })
+            .Return<User>("u")
+            .ResultsAsync;
 
-        return queryResults
-            .Select(
-                record => new User
-                {
-                    Name = record["Name"].As<String>(),
-                    Email = record["Email"].As<String>()
-                })
-            .Single();
+        return newUser.FirstOrDefault();
     }
 
     public async Task<User> GetByEmailAsync(string email)
     {
-        var (queryResults, _) = await _driver
-            .ExecutableQuery(@"
-                MATCH (u:User)
-                WHERE u.Email = $email
-                RETURN u.UserId AS UserId, u.Name AS Name, u.Email AS Email")
-            .WithParameters(new { email })
-            .ExecuteAsync();
+        var user = await _graphClient.Cypher
+            .Match("(u:User)")
+            .Where((User u) => u.Email == email)
+            .Return<User>("u")
+            .ResultsAsync;
 
-        var userResult = queryResults
-            .Select(
-                record => new User
-                {
-                    Name = record["Name"].As<String>(),
-                    Email = record["Email"].As<String>(),
-                })
-            .FirstOrDefault();
-
-        if (userResult == null)
-        {
-            return null;
-        }
-
-        return userResult;
+        return user.FirstOrDefault();
     }
 
     public async Task<User> Login(LoginRequestDto loginRequestDto)
     {
-        var (queryResults, _) = await _driver
-               .ExecutableQuery(@"
-                   MATCH (u:User)
-                   WHERE u.Email = $email
-                   RETURN u.UserId AS UserId, u.Name AS Name, u.Email AS Email, u.Password AS Password")
-               .WithParameters(new { email = loginRequestDto.Email })
-               .ExecuteAsync();
+        var user = await _graphClient.Cypher
+            .Match("(u:User)")
+            .Where((User u) => u.Email == loginRequestDto.Email)
+            .Return<User>("u")
+            .ResultsAsync;
 
-           var userResult = queryResults
-               .Select(
-                   record => new User
-                   {
-                       Name = record["Name"].As<String>(),
-                       Email = record["Email"].As<String>(),
-                       Password = record["Password"].As<String>()
-                   })
-               .FirstOrDefault();
-
-           if (userResult == null)
-           {
-               return null;
-           }
-
-           return userResult;
+        return user.FirstOrDefault();
     }
     
 }
