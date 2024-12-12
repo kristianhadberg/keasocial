@@ -40,10 +40,21 @@ if (useMongoDb)
 }
 else
 {
+    var loggerFactory = LoggerFactory.Create(loggingBuilder =>
+    {
+        loggingBuilder.AddConsole(); // Log EF Core queries to the console
+    });
     // Configure MySQL
     builder.Services.AddDbContext<KeasocialDbContext>(options =>
     {
-        options.UseMySql(builder.Configuration.GetConnectionString("MySql"), new MySqlServerVersion(new Version(8, 0, 27)));
+        options.UseMySql(
+            builder.Configuration.GetConnectionString("MySql"),
+            new MySqlServerVersion(new Version(8, 0, 27))
+        )
+        .UseLoggerFactory(loggerFactory)          // Attach logging factory
+        .EnableSensitiveDataLogging()             // Show parameter values in logs
+        .EnableDetailedErrors();      
+        
     });
 
     // Register MySQL repositories
@@ -64,22 +75,6 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 
 builder.Services.AddSingleton<JwtService>();
 
-// Enable EF Core logging
-var loggerFactory = LoggerFactory.Create(loggingBuilder =>
-{
-    loggingBuilder.AddConsole(); // Log EF Core queries to the console
-});
-
-builder.Services.AddDbContext<KeasocialDbContext>(options =>
-{
-    options.UseMySql(
-            builder.Configuration.GetConnectionString("DefaultConnection"), 
-            new MySqlServerVersion(new Version(9, 1, 0))
-        )
-        .UseLoggerFactory(loggerFactory)          // Attach logging factory
-        .EnableSensitiveDataLogging()             // Show parameter values in logs
-        .EnableDetailedErrors();                  // Provide detailed error messages
-});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>

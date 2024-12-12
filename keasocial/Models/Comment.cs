@@ -1,8 +1,14 @@
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace keasocial.Models;
 
 
 public class Comment
 {
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; }
     public int CommentId { get; set; }
     public int UserId { get; set; }
     public int PostId { get; set; }
