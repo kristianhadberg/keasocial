@@ -1,0 +1,79 @@
+// Create Users
+CREATE (:User {Uuid: randomUUID(), Name: 'John Doe', Email: 'john@example.com', Password: 'password123'});
+CREATE (:User {Uuid: randomUUID(), Name: 'Jane Smith', Email: 'jane@example.com', Password: 'password123'});
+CREATE (:User {Uuid: randomUUID(), Name: 'Alice Brown', Email: 'alice@example.com', Password: 'password123'});
+CREATE (:User {Uuid: randomUUID(), Name: 'Bob Johnson', Email: 'bob@example.com', Password: 'password123'});
+
+// Create Lectures
+CREATE (:Lecture {Uuid: randomUUID(), LectureTitle: 'Introduction to C#', LectureDescription: 'A beginner-friendly introduction to C# and .NET.', LectureDate: '2024-09-21', LectureTime: '10:00:00'});
+CREATE (:Lecture {Uuid: randomUUID(), LectureTitle: 'Advanced Database Design', LectureDescription: 'Deep dive into database design principles.', LectureDate: '2024-09-22', LectureTime: '14:00:00'});
+CREATE (:Lecture {Uuid: randomUUID(), LectureTitle: 'Game Development 101', LectureDescription: 'Learn the basics of game development with Unity.', LectureDate: '2024-09-23', LectureTime: '09:00:00'});
+CREATE (:Lecture {Uuid: randomUUID(), LectureTitle: 'Outdoor Survival Skills', LectureDescription: 'Learn the essential skills for outdoor survival.', LectureDate: '2024-09-24', LectureTime: '11:00:00'});
+
+// Create Posts
+MATCH (u:User {Email: 'john@example.com'}) 
+CREATE (u)-[:POSTED]->(p:Post {Uuid: randomUUID(), PostId: 1, Content: 'Hello, World! This is my first post.', CreatedAt: timestamp(), LikeCount: 1});
+MATCH (u:User {Email: 'jane@example.com'}) 
+CREATE (u)-[:POSTED]->(p:Post {Uuid: randomUUID(), PostId: 2, Content: 'Just finished a great book on software architecture!', CreatedAt: timestamp(), LikeCount: 1});
+MATCH (u:User {Email: 'alice@example.com'}) 
+CREATE (u)-[:POSTED]->(p:Post {Uuid: randomUUID(), PostId: 3, Content: 'Anyone up for a hike this weekend?', CreatedAt: timestamp(), LikeCount: 1});
+MATCH (u:User {Email: 'bob@example.com'}) 
+CREATE (u)-[:POSTED]->(p:Post {Uuid: randomUUID(), PostId: 4, Content: 'Learning how to make video games is awesome!', CreatedAt: timestamp(), LikeCount: 0});
+
+// Create Comments and Link with Posts
+MATCH (u:User {Email: 'john@example.com'}), (p:Post {PostId: 1}) 
+CREATE (u)-[:COMMENTED]->(c:Comment {Uuid: randomUUID(), CommentId: 1, Content: 'Welcome to the platform, John!', CreatedAt: timestamp(), LikeCount: 1}),
+       (p)-[:HAS_COMMENT]->(c);
+
+MATCH (u:User {Email: 'jane@example.com'}), (p:Post {PostId: 2}) 
+CREATE (u)-[:COMMENTED]->(c:Comment {Uuid: randomUUID(), CommentId: 2, Content: 'What book did you read?', CreatedAt: timestamp(), LikeCount: 1}),
+       (p)-[:HAS_COMMENT]->(c);
+
+MATCH (u:User {Email: 'alice@example.com'}), (p:Post {PostId: 3}) 
+CREATE (u)-[:COMMENTED]->(c:Comment {Uuid: randomUUID(), CommentId: 3, Content: 'Count me in for the hike!', CreatedAt: timestamp(), LikeCount: 1}),
+       (p)-[:HAS_COMMENT]->(c);
+
+MATCH (u:User {Email: 'john@example.com'}), (p:Post {PostId: 4}) 
+CREATE (u)-[:COMMENTED]->(c:Comment {Uuid: randomUUID(), CommentId: 4, Content: 'Can you share some game development resources?', CreatedAt: timestamp(), LikeCount: 1}),
+       (p)-[:HAS_COMMENT]->(c);
+
+// Create Users LIKED Post
+MATCH (u:User {Email: 'john@example.com'}), (p:Post {PostId: 1}) 
+CREATE (u)-[:LIKED]->(p);
+
+MATCH (u:User {Email: 'jane@example.com'}), (p:Post {PostId: 2}) 
+CREATE (u)-[:LIKED]->(p);
+
+MATCH (u:User {Email: 'alice@example.com'}), (p:Post {PostId: 3}) 
+CREATE (u)-[:LIKED]->(p);
+
+MATCH (u:User {Email: 'bob@example.com'}), (p:Post {PostId: 4}) 
+CREATE (u)-[:LIKED]->(p);
+
+// Create Users LIKED Comment
+MATCH (u:User {Email: 'john@example.com'}), (c:Comment {CommentId: 1}) 
+CREATE (u)-[:LIKED]->(c);
+
+MATCH (u:User {Email: 'john@example.com'}), (c:Comment {CommentId: 2}) 
+CREATE (u)-[:LIKED]->(c);
+
+MATCH (u:User {Email: 'john@example.com'}), (c:Comment {CommentId: 3}) 
+CREATE (u)-[:LIKED]->(c);
+
+MATCH (u:User {Email: 'john@example.com'}), (c:Comment {CommentId: 4}) 
+CREATE (u)-[:LIKED]->(c);
+
+MATCH (u:User {Email: 'jane@example.com'}), (c:Comment {CommentId: 2}) 
+CREATE (u)-[:LIKED]->(c);
+
+MATCH (u:User {Email: 'jane@example.com'}), (c:Comment {CommentId: 3}) 
+CREATE (u)-[:LIKED]->(c);
+
+MATCH (u:User {Email: 'alice@example.com'}), (c:Comment {CommentId: 3}) 
+CREATE (u)-[:LIKED]->(c);
+
+MATCH (u:User {Email: 'bob@example.com'}), (c:Comment {CommentId: 4}) 
+CREATE (u)-[:LIKED]->(c);
+
+MATCH (u:User {Email: 'bob@example.com'}), (c:Comment {CommentId: 1}) 
+CREATE (u)-[:LIKED]->(c);
