@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using keasocial.Models;
 using keasocial.Dto;
 using keasocial.Repositories.Interfaces;
@@ -20,7 +19,7 @@ public class PostService : IPostService
         return await _postRepository.GetAsync(uuid);
     }
 
-    public async Task<List<PostDto>> GetAsync()
+    public async Task<List<Post>> GetAsync()
     {
         return await _postRepository.GetAsync();
     }

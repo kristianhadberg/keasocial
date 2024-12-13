@@ -23,20 +23,52 @@ public class UserRepository : IUserRepository
         var query = await _graphClient.Cypher
             .Match("(u:User)")
             .Where((User u) => u.Uuid == uuid)
-            .Return<User>("u")
+            .OptionalMatch("(u)-[:POSTED]->(p:Post)")
+            .OptionalMatch("(u)-[:COMMENTED]->(c:Comment)")
+            .Return((u, p, c) => new
+            {
+                User = u.As<User>(),
+                Posts = p.CollectAs<Post>(),
+                Comments = p.CollectAs<Comment>()
+            })
             .ResultsAsync;
-        
-        return query.FirstOrDefault();
-    }
 
+        var data = query.FirstOrDefault();
+
+        if (data == null) return null;
+        
+        var user = data.User;
+        user.Posts = data.Posts.ToList();
+        user.Comments = data.Comments.ToList();
+        return user;
+    }
+    
     public async Task<List<User>> GetAsync()
     {
         var users = await _graphClient.Cypher
             .Match("(u:User)")
-            .Return<User>("u")
+            .OptionalMatch("(u)-[:POSTED]->(p:Post)")
+            .OptionalMatch("(u)-[:COMMENTED]->(c:Comment)")
+            .Return((u, p,c) => new
+            {
+                User = u.As<User>(),
+                Posts = p.CollectAs<Post>(),
+                Comments = p.CollectAs<Comment>()
+            })
             .ResultsAsync;
 
-        return users.ToList();
+        var userList = users.ToList();
+
+        if (userList == null) return new List<User>();
+
+        foreach (var data in userList)
+        {
+            var user = data.User;
+            user.Posts = data.Posts.ToList();
+            user.Comments = data.Comments.ToList();
+        }
+        
+        return userList.Select(u => u.User).ToList();
     }
 
     public async Task<User> Create(User user)

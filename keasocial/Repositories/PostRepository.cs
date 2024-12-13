@@ -37,14 +37,29 @@ public class PostRepository : IPostRepository
         return post;
     }
 
-    public async Task<List<PostDto>> GetAsync()
+    public async Task<List<Post>> GetAsync()
     {
-        var posts = await _graphClient.Cypher
+        var result = await _graphClient.Cypher
             .Match("(p:Post)")
-            .Return<PostDto>("p")
+            .OptionalMatch("(p)-[:HAS_COMMENT]->(c:Comment)")
+            .Return((p, c) => new
+            {
+                Post = p.As<Post>(),
+                Comments = c.CollectAs<Comment>()
+            })
             .ResultsAsync;
 
-        return posts.ToList();
+        var postList = result.ToList();
+
+        if (postList == null) return new List<Post>();
+
+        foreach (var data in postList)
+        {
+            var post = data.Post;
+            post.Comments = data.Comments.ToList();
+        }
+        
+        return postList.Select(p => p.Post).ToList();
     }
     
     public async Task<Post> CreateAsync(Post post, string userUuid)
