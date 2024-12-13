@@ -14,10 +14,7 @@ public class UserRepository : IUserRepository
     {
         _graphClient = graphClient;
     }
-
-    /*
-     * Perhaps ids should be removed from the user nodes entirely?
-     */
+    
     public async Task<User> GetAsync(string uuid)
     {
         var query = await _graphClient.Cypher
