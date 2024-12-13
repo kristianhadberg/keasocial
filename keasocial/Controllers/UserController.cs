@@ -23,10 +23,10 @@ public class UserController : ControllerBase
         return Ok(users);
     }
     
-    [HttpGet("{userId}")]
-    public async Task<ActionResult<List<User>>> Get(int userId)
+    [HttpGet("{userUuid}")]
+    public async Task<ActionResult<List<User>>> Get(string userUuid)
     {
-        var user = await _userService.GetAsync(userId);
+        var user = await _userService.GetAsync(userUuid);
         return Ok(user);
     }
 
@@ -34,7 +34,7 @@ public class UserController : ControllerBase
     public async Task<ActionResult<User>> Post([FromBody]UserCreateDto userCreateDto)
     {
         var newUser = await _userService.Create(userCreateDto);
-        return CreatedAtAction(nameof(Get), new { id = newUser.UserId }, newUser);
+        return CreatedAtAction(nameof(Get), new { id = newUser.Uuid }, newUser);
     }
 
     [HttpPost("login")]

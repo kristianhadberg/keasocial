@@ -18,9 +18,9 @@ public class UserService : IUserService
         _jwtService = jwtService;
     }
 
-    public async Task<User> GetAsync(int id)
+    public async Task<User> GetAsync(string uuid)
     {
-        return await _userRepository.GetAsync(id);
+        return await _userRepository.GetAsync(uuid);
     }
 
     public async Task<List<User>> GetAsync()
@@ -57,7 +57,7 @@ public class UserService : IUserService
             throw new ArgumentException("Invalid username or password.");
         }
 
-        var token = _jwtService.GenerateToken(user.Email, user.UserId);
+        var token = _jwtService.GenerateToken(user.Email, user.Uuid);
 
         var loginResponse = new LoginResponseDto
         {

@@ -18,11 +18,11 @@ public class UserRepository : IUserRepository
     /*
      * Perhaps ids should be removed from the user nodes entirely?
      */
-    public async Task<User> GetAsync(int id)
+    public async Task<User> GetAsync(string uuid)
     {
         var query = await _graphClient.Cypher
             .Match("(u:User)")
-            .Where((User u) => u.UserId == id)
+            .Where((User u) => u.Uuid == uuid)
             .Return<User>("u")
             .ResultsAsync;
         
@@ -42,7 +42,7 @@ public class UserRepository : IUserRepository
     public async Task<User> Create(User user)
     {
         var newUser = await _graphClient.Cypher
-            .Create("(u:User {Name: $name, Email: $email, Password: $password})")
+            .Create("(u:User {Uuid: randomUUID(), Name: $name, Email: $email, Password: $password})")
             .WithParams(new
             {
                 name = user.Name,
