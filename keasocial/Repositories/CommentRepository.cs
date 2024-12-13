@@ -1,4 +1,3 @@
-using keasocial.Data;
 using keasocial.Dto;
 using keasocial.Models;
 using keasocial.Repositories.Interfaces;

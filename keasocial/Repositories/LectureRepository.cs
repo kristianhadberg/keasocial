@@ -1,4 +1,4 @@
-using keasocial.Data;
+/*using keasocial.Data;
 using keasocial.Models;
 using keasocial.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -49,4 +49,4 @@ public class LectureRepository : ILectureRepository
 
         return deletedLecture.Entity;
     }
-}
+}*/
