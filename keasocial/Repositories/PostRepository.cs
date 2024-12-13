@@ -1,133 +1,146 @@
-using keasocial.Data;
 using keasocial.Dto;
 using keasocial.Models;
 using keasocial.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using Neo4jClient;
 
 namespace keasocial.Repositories;
 
 public class PostRepository : IPostRepository
 {
-    private readonly KeasocialDbContext _keasocialDbContext;
+    private readonly IGraphClient _graphClient;
 
-    public PostRepository(KeasocialDbContext keasocialDbContext)
+    public PostRepository(IGraphClient graphClient)
     {
-        _keasocialDbContext = keasocialDbContext;
+        _graphClient = graphClient;
     }
 
-    public async Task<Post> GetAsync(int id)
+    public async Task<Post> GetAsync(string uuid)
     {
-        return await _keasocialDbContext.Posts.FindAsync(id);
+        var result = await _graphClient.Cypher
+            .Match("(p:Post)")
+            .Where((Post p) => p.Uuid == uuid)
+            .OptionalMatch("(p)-[:HAS_COMMENT]->(c:Comment)")
+            .Return((p, c) => new
+            {
+                Post = p.As<Post>(),
+                Comments = c.CollectAs<Comment>(),
+            })
+            .ResultsAsync;
+
+        var data = result.FirstOrDefault();
+
+        if (data == null) return null;
+
+
+        var post = data.Post;
+        post.Comments = data.Comments.ToList();
+        return post;
     }
 
     public async Task<List<PostDto>> GetAsync()
     {
-        var posts = await _keasocialDbContext.Posts
-            .Include(p => p.Comments)
-                .ThenInclude(c => c.CommentLikes)
-            .ToListAsync();
+        var posts = await _graphClient.Cypher
+            .Match("(p:Post)")
+            .Return<PostDto>("p")
+            .ResultsAsync;
 
-        var postDtos = posts.Select(post => new PostDto
+        return posts.ToList();
+    }
+    
+    public async Task<Post> CreateAsync(Post post, string userUuid)
+    {
+        var newPost = await _graphClient.Cypher
+            .Create("(p: Post {Uuid: randomUUID(), Content: $content, CreatedAt: $createdAt, LikeCount: $likeCount})")
+            .WithParams(new
+            {
+                content = post.Content,
+                createdAt = post.CreatedAt,
+                likeCount = post.LikeCount
+            })
+            .Return<Post>("p")
+            .ResultsAsync;
+
+        var createdPost = newPost.FirstOrDefault();
+
+        if (createdPost != null)
         {
-            PostId = post.PostId,
-            UserId = post.UserId,
-            Content = post.Content,
-            CreatedAt = post.CreatedAt,
-            LikeCount = post.LikeCount,
-            Comments = post.Comments.Select(CommentToDto).ToList()
-        }).ToList();
+            await _graphClient.Cypher
+                .Match("(u:User {Uuid: $userUuid})", "(p:Post {Uuid: $postUuid})")
+                .Where((Post p) => p.Uuid == createdPost.Uuid)
+                .Create("(u)-[:POSTED]->(p)")
+                .WithParams(new
+                {
+                    userUuid = userUuid,
+                    postUuid = createdPost.Uuid
+                })
+                .ExecuteWithoutResultsAsync();
+        }
 
-        return postDtos;
+        return createdPost;
     }
     
-    public async Task<Post> CreateAsync(Post post)
+    public async Task<Post> UpdateAsync(string uuid, Post post)
     {
-        await _keasocialDbContext.Posts.AddAsync(post);
-        await _keasocialDbContext.SaveChangesAsync();
-        
-        return post;
+        var updatedPost = await _graphClient.Cypher
+            .Match("(p:Post {Uuid: $postUuid})")
+            .Set("p.Content = $content, p.CreatedAt = $createdAt, p.LikeCount = $likeCount")
+            .WithParams(new
+            {
+                postUuid = uuid,
+                content = post.Content,
+                createdAt = post.CreatedAt,
+                likeCount = post.LikeCount
+            })
+            .Return<Post>("p")
+            .ResultsAsync;
+
+        return updatedPost.FirstOrDefault();
     }
     
-    public async Task<Post> UpdateAsync(int id, Post post)
+    public async Task<Post> DeleteAsync(string uuid)
     {
-        var updatedPost = _keasocialDbContext.Posts.Update(post);
-        await _keasocialDbContext.SaveChangesAsync();
-        return updatedPost.Entity;
-    }
-    
-    public async Task<Post> DeleteAsync(int id)
-    {
-        var post = await _keasocialDbContext.Posts.FindAsync(id);
-        _keasocialDbContext.Posts.Remove(post);
-        await _keasocialDbContext.SaveChangesAsync();
-        return post;
+        var deletedPost = await _graphClient.Cypher
+            .Match("(p:Post {Uuid: $uuid})")
+            .WithParams(new { uuid })
+            .DetachDelete("p")
+            .Return<Post>("p") 
+            .ResultsAsync;
+
+        return deletedPost.FirstOrDefault();
     }
 
-    public async Task<bool> AddPostLikeAsync(int userId, int postId)
+    public async Task<bool> AddPostLikeAsync(string postUuid, string userUuid)
     {
-        var existingLike =
-            await _keasocialDbContext.PostLikes.FirstOrDefaultAsync(pl => pl.UserId == userId && pl.PostId == postId);
+        var existingLike = await _graphClient.Cypher
+            .Match("(u:User {Uuid: $userUuid})-[r:LIKED]->(p:Post {Uuid: $postUuid})")
+            .WithParams(new { userUuid, postUuid })
+            .Return<int>("count(r)") // Check if the relationship exists
+            .ResultsAsync;
 
-        if (existingLike != null)
+        if (existingLike.FirstOrDefault() > 0)
         {
             return false;
         }
-
-        var postLike = new PostLike
-        {
-            UserId = userId,
-            PostId = postId
-        };
-
-        await _keasocialDbContext.PostLikes.AddAsync(postLike);
-        await _keasocialDbContext.SaveChangesAsync();
+        
+        await _graphClient.Cypher
+            .Match("(u:User {Uuid: $userUuid}), (p:Post {Uuid: $postUuid})")
+            .WithParams(new { userUuid, postUuid })
+            .Create("(u)-[:LIKED]->(p)")
+            .ExecuteWithoutResultsAsync();
 
         return true;
     }
 
-    public async Task<List<PostLikeView>> GetPostLikesAsync(int postId)
+    public async Task<bool> IsUserAuthorizedToChangePost(string userUuid, string postUuid)
     {
-        var postLikes = await _keasocialDbContext.PostLikeViews
-            .Where(pl => pl.PostId == postId)
-            .ToListAsync();
-        
-        return postLikes;
+        var userPostCheck = await _graphClient.Cypher
+            .Match("(u:User {Uuid: $userUuid})-[:POSTED]->(p:Post {Uuid: $postUuid})")
+            .WithParams(new { userUuid, postUuid })
+            .Return<int>("count(p)")
+            .ResultsAsync;
+
+        return userPostCheck.FirstOrDefault() > 0;
     }
-
-    public async Task<List<PostDto>> GetMostLikedPostsAsync()
-    {
-        // Fetch posts using stored procedure
-        
-        
-        
-        var posts = await _keasocialDbContext.Posts
-            .FromSqlInterpolated($"CALL GetMostLikedPosts()")
-            .ToListAsync();
-
-        // Cant use Include/ThenInclude directly on the result of the stored procedure
-        // So instead we fetch the comments independently
-        var postIds = posts.Select(p => p.PostId).ToList();
-        var comments = await _keasocialDbContext.Comments
-            .Where(c => postIds.Contains(c.PostId))
-            .Include(c => c.CommentLikes) // Include CommentLikes
-            .ToListAsync();
-
-        var mostLikedPostDtos = posts.Select(post => new PostDto
-        {
-            PostId = post.PostId,
-            UserId = post.UserId,
-            Content = post.Content,
-            CreatedAt = post.CreatedAt,
-            LikeCount = post.LikeCount,
-            Comments = comments
-                .Where(c => c.PostId == post.PostId)
-                .Select(CommentToDto)
-                .ToList()
-        }).ToList();
-
-        return mostLikedPostDtos;
-    }
-
 
     private CommentDto CommentToDto(Comment comment)
     {

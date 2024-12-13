@@ -5,16 +5,14 @@ namespace keasocial.Services.Interfaces;
 
 public interface IPostService
 {
-    Task<Post> GetAsync(int id);
+    Task<Post> GetAsync(string uuid);
     Task<List<PostDto>> GetAsync();
     
     Task<Post> CreateAsync(PostCreateDto postCreate);
     
-    Task<Post> UpdateAsync(int id, PostUpdateDto postCreate, int userId);
+    Task<Post> UpdateAsync(string uuid, PostUpdateDto postCreate, string userUuid);
     
-    Task<Post> DeleteAsync(int userId, int postId);
-    Task<bool> AddPostLikeAsync(int userId, int postId);
-    Task<List<PostLikeView>> GetPostLikesAsync(int postId);
-    Task<List<PostDto>> GetMostLikedPostsAsync();
+    Task<Post> DeleteAsync(string postUuid, string userUuid);
+    Task<bool> AddPostLikeAsync(string postUuid, string userUuid);
 
 }

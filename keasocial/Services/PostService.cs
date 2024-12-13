@@ -15,9 +15,9 @@ public class PostService : IPostService
         _postRepository = postRepository;
     }
 
-    public async Task<Post> GetAsync(int id)
+    public async Task<Post> GetAsync(string uuid)
     {
-        return await _postRepository.GetAsync(id);
+        return await _postRepository.GetAsync(uuid);
     }
 
     public async Task<List<PostDto>> GetAsync()
@@ -32,82 +32,71 @@ public class PostService : IPostService
         var post = new Post
         
         {
-            UserId = postCreateDto.UserId,
             Content = postCreateDto.Content,
             CreatedAt = DateTime.UtcNow,
             LikeCount = postCreateDto.LikeCount,
-            
         };
-        return await _postRepository.CreateAsync(post);
+        return await _postRepository.CreateAsync(post, postCreateDto.UserUuid);
 
     }
 
-    public async Task<Post> UpdateAsync(int id, PostUpdateDto postUpdateDto, int userId)
+    public async Task<Post> UpdateAsync(string postUuid, PostUpdateDto postUpdateDto, string userUuid)
     {
         ValidatePostUpdateDto(postUpdateDto);
-        
-        Post post = await _postRepository.GetAsync(id);
-        
+
+        Post post = await _postRepository.GetAsync(postUuid);
+
         if (post == null)
         {
-            throw new KeyNotFoundException($"Post with ID {id} not found.");
+            throw new KeyNotFoundException($"Post with ID {postUuid} not found.");
         }
-        
-        if (post.UserId != userId)
+
+        var isUserAuthorized = await _postRepository.IsUserAuthorizedToChangePost(userUuid, postUuid);
+        if (!isUserAuthorized)
+        {
+            throw new UnauthorizedAccessException("You are not authorized to update this post.");
+        }
+
+        post.Content = postUpdateDto.Content;
+        post.LikeCount = postUpdateDto.LikeCount;
+        var updatedPost = await _postRepository.UpdateAsync(postUuid, post);
+        return updatedPost;
+    }
+
+    public async Task<Post> DeleteAsync(string postUuid, string userUuid)
+    {
+        var post = await _postRepository.GetAsync(postUuid);
+
+        if (post == null)
+        {
+            throw new KeyNotFoundException($"Post with id: {postUuid} does not exist.");
+        }
+
+        var isUserAuthorized = await _postRepository.IsUserAuthorizedToChangePost(userUuid, postUuid);
+        if (!isUserAuthorized)
         {
             throw new UnauthorizedAccessException("You are not authorized to update this post.");
         }
         
-        post.Content = postUpdateDto.Content;
-        post.LikeCount = postUpdateDto.LikeCount;
-        var updatedPost = await _postRepository.UpdateAsync(id, post);
-        return updatedPost;
+        return await _postRepository.DeleteAsync(postUuid);
     }
 
-    public async Task<Post> DeleteAsync(int userId, int postId)
+    public async Task<bool> AddPostLikeAsync(string postUuid, string userUuid)
     {
-        var post = await _postRepository.GetAsync(postId);
-
-        if (post == null)
-        {
-            throw new KeyNotFoundException($"Post with id: {postId} does not exist.");
-        }
-
-        if (post.UserId != userId)
-        {
-            throw new UnauthorizedAccessException("You are not authorized to delete this post.");
-        }
-        
-        return await _postRepository.DeleteAsync(postId);
-    }
-
-    public async Task<bool> AddPostLikeAsync(int userId, int postId)
-    {
-        var postExists = await _postRepository.GetAsync(postId);
+        var postExists = await _postRepository.GetAsync(postUuid);
 
         if (postExists == null)
         {
-            throw new KeyNotFoundException($"Post with id: {postId} does not exist.");
+            throw new KeyNotFoundException($"Post with id: {postUuid} does not exist.");
         }
-        
-        var success = await _postRepository.AddPostLikeAsync(userId, postId);
 
+        var success = await _postRepository.AddPostLikeAsync(postUuid, userUuid);
         if (!success)
         {
             throw new BadHttpRequestException("You have already liked this post.");
         }
 
         return true;
-    }
-
-    public async Task<List<PostLikeView>> GetPostLikesAsync(int postId)
-    {
-        return await _postRepository.GetPostLikesAsync(postId);
-    }
-
-    public async Task<List<PostDto>> GetMostLikedPostsAsync()
-    {
-        return await _postRepository.GetMostLikedPostsAsync();
     }
 
     public void ValidatePostCreateDto(PostCreateDto postCreateDto)

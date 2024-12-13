@@ -12,12 +12,10 @@ namespace keasocial.Controllers;
 public class PostController : ControllerBase
 {
     private readonly IPostService _postService;
-    private readonly IUserService _userService;
 
-    public PostController(IPostService postService, IUserService userService)
+    public PostController(IPostService postService)
     {
         _postService = postService;
-        _userService = userService;
     }
 
     [HttpGet]
@@ -27,10 +25,10 @@ public class PostController : ControllerBase
         return Ok(posts);
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<List<Post>>> Get(int id)
+    [HttpGet("{uuid}")]
+    public async Task<ActionResult<List<Post>>> Get(string uuid)
     {
-        var post = await _postService.GetAsync(id);
+        var post = await _postService.GetAsync(uuid);
         return Ok(post);
     }
     
@@ -38,50 +36,35 @@ public class PostController : ControllerBase
     public async Task<ActionResult<Post>> Create([FromBody] PostCreateDto postCreate)
     {
         var createdPost = await _postService.CreateAsync(postCreate);
-        return CreatedAtAction(nameof(Get), new { id = createdPost.PostId }, createdPost);
-        return Ok(createdPost);
+        return CreatedAtAction(nameof(Get), new { id = createdPost.Uuid }, createdPost);
     }
     
     [Authorize]
-    [HttpPut("{id}")]
-    public async Task<ActionResult<Post>> Put(int id, [FromBody] PostUpdateDto postCreate)
+    [HttpPut("{uuid}")]
+    public async Task<ActionResult<Post>> Put(string uuid, [FromBody] PostUpdateDto postCreate)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-        var updatedPost = await _postService.UpdateAsync(id, postCreate, userId);
+        var updatedPost = await _postService.UpdateAsync(uuid, postCreate, userId);
         return Ok(updatedPost);
     }
     
     [Authorize]
-    [HttpDelete("{postId}")]
-    public async Task<ActionResult> Delete(int postId)
+    [HttpDelete("{postUuid}")]
+    public async Task<ActionResult> Delete(string postUuid)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
         
-        await _postService.DeleteAsync(userId, postId);
+        await _postService.DeleteAsync(postUuid, userId);
         return Ok("Post deleted successfully.");
     }
-
-    [HttpGet("like/{postId}")]
-    public async Task<ActionResult<List<PostLikeView>>> GetPostLikes(int postId)
-    {
-        var postLikeView = await _postService.GetPostLikesAsync(postId);
-        return Ok(postLikeView);
-    }
-
-    [HttpGet("most-liked")]
-    public async Task<ActionResult<List<PostDto>>> GetMostLikedPosts()
-    {
-        var mostLikedPosts = await _postService.GetMostLikedPostsAsync();
-        return Ok(mostLikedPosts);
-    }
-
+    
     [Authorize]
-    [HttpPost("like/{postId}")]
-    public async Task<ActionResult> Post(int postId)
+    [HttpPost("like/{postUuid}")]
+    public async Task<ActionResult> Post(string postUuid)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-        await _postService.AddPostLikeAsync(userId, postId);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        await _postService.AddPostLikeAsync(postUuid, userId);
         
         return Ok("Post liked successfully.");
     }
