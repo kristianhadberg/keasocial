@@ -7,6 +7,5 @@ public class Calendar
     public bool IsPublic { get; set; }
 
     // Navigation properties
-    public User User { get; set; }
     public ICollection<Lecture> Lectures { get; set; }
 }

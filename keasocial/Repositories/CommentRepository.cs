@@ -2,126 +2,145 @@ using keasocial.Data;
 using keasocial.Dto;
 using keasocial.Models;
 using keasocial.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using Neo4jClient;
 
 namespace keasocial.Repositories;
 
 public class CommentRepository : ICommentRepository
 {
-    private readonly KeasocialDbContext _keasocialDbContext;
+    private readonly IGraphClient _graphClient;
 
-    public CommentRepository(KeasocialDbContext keasocialDbContext)
+    public CommentRepository(IGraphClient graphClient)
     {
-        _keasocialDbContext = keasocialDbContext;
+        _graphClient = graphClient;
     }
     
-    public async Task<Comment> GetAsync(int commentId)
+    public async Task<Comment> GetAsync(string commentUuid, string postUuid)
     {
-       return await _keasocialDbContext.Comments.FindAsync(commentId);
-           
+        var comment = await _graphClient.Cypher
+            .Match("(p:Post {Uuid: $postUuid})-[:HAS_COMMENT]->(c:Comment {Uuid: $commentUuid})")
+            .WithParams(new { commentUuid, postUuid})
+            .Return<Comment>("c")
+            .ResultsAsync;
+
+        return comment.FirstOrDefault();
     }
     
     public async Task<List<CommentDto>> GetAsync()
     {
-        return await _keasocialDbContext.Comments
-            .Select(c => new CommentDto
-            {
-                CommentId = c.CommentId,
-                PostId = c.PostId,
-                UserId = c.UserId,
-                Content = c.Content,
-                CreatedAt = c.CreatedAt,
-                LikeCount = c.LikeCount
-            })
-            .ToListAsync();
+        var result = await _graphClient.Cypher
+            .Match("(c:Comment)")
+            .Return<CommentDto>("c")
+            .ResultsAsync;
+        return result.ToList();
     }
-
     
-    public async Task<IEnumerable<CommentDto>> GetByPostIdAsync(int postId)
+    public async Task<IEnumerable<CommentDto>> GetByPostIdAsync(string postUuid)
     {
-        return await _keasocialDbContext.Comments
-            .Where(c => c.PostId == postId)
-            .Select(c => new CommentDto
+        var comments = await _graphClient.Cypher
+            .Match("(p:Post {Uuid: $postUuid})-[:HAS_COMMENT]->(c:Comment)")
+            .WithParams(new { postUuid })
+            .Return<CommentDto>("c")
+            .ResultsAsync;
+
+        return comments.ToList();
+    }
+    
+    public async Task<CommentDto> CreateAsync(Comment comment, string postUuid, string userUuid)
+    {
+        var newComment = await _graphClient.Cypher
+            .Create("(c:Comment {Uuid: randomUUID(), Content: $content, CreatedAt: $createdAt, LikeCount: $likeCount})")
+            .WithParams(new
             {
-                CommentId = c.CommentId,
-                UserId = c.UserId,
-                PostId = c.PostId,
-                Content = c.Content,
-                CreatedAt = c.CreatedAt,
-                LikeCount = c.LikeCount,
-                CommentLikes = c.CommentLikes.Select(cl => new CommentLikeDto
-                {
-                    UserId = cl.UserId,
-                    CommentId = cl.CommentId
-                }).ToList()
+                content = comment.Content,
+                createdAt = comment.CreatedAt,
+                likeCount = comment.LikeCount
             })
-            .ToListAsync();
-    }
-
-
-
-
-    public async Task<CommentDto> CreateAsync(Comment comment)
-    {
-        await _keasocialDbContext.Comments.AddAsync(comment);
-        await _keasocialDbContext.SaveChangesAsync();
-
-        var commentDto = new CommentDto
+            .Return<CommentDto>("c")
+            .ResultsAsync;
+            
+        var createdComment = newComment.FirstOrDefault();
+        if (createdComment != null)
         {
-            CommentId = comment.CommentId,
-            UserId = comment.UserId,
-            PostId = comment.PostId,
-            Content = comment.Content,
-            CreatedAt = comment.CreatedAt,
-            LikeCount = comment.LikeCount,
-        };
-
-        return commentDto;
-    }
-
-    public async Task<Comment> UpdateAsync(int commentId, Comment comment)
-    {
-        var existingComment =  _keasocialDbContext.Comments.Update(comment);
-        await _keasocialDbContext.SaveChangesAsync();
-        return existingComment.Entity;
-    }
-
-    public async Task<Comment> DeleteAsync(int commentId)
-    {
-        var comment = await _keasocialDbContext.Comments.FindAsync(commentId);
-        _keasocialDbContext.Comments.Remove(comment);
-        await _keasocialDbContext.SaveChangesAsync();
-        return comment; 
-    }
-
-    public async Task<bool> AddCommentLikeAsync(int userId, int commentId, int postId)
-    {
-        var existingLike = await _keasocialDbContext.CommentLikes
-            .FirstOrDefaultAsync(cl => cl.UserId == userId && cl.CommentId == commentId);
-
-        if (existingLike != null)
-        {
-            return false; 
+            // Create relationships: User -> Comment & Post -> Comment
+            await _graphClient.Cypher
+                .Match("(u:User {Uuid: $userUuid})", "(p:Post {Uuid: $postUuid})", "(c:Comment {Uuid: $commentUuid})")
+                .Where((Comment c) => c.Uuid == createdComment.Uuid)
+                .Create("(u)-[:COMMENTED]->(c)")
+                .Create("(p)-[:HAS_COMMENT]->(c)")
+                .WithParams(new
+                {
+                    commentUuid = createdComment.Uuid,
+                    userUuid = userUuid,
+                    postUuid = postUuid
+                })
+                .ExecuteWithoutResultsAsync();
         }
 
-        var commentLike = new CommentLike
-        {
-            UserId = userId,
-            CommentId = commentId
-        };
+        return createdComment; 
+    }
 
-        await _keasocialDbContext.CommentLikes.AddAsync(commentLike);
-        await _keasocialDbContext.SaveChangesAsync();
+    public async Task<Comment> UpdateAsync(string uuid, Comment comment)
+    {
+        var updatedComment = await _graphClient.Cypher
+            .Match("(c:Comment {Uuid: $uuid})")
+            .Set("c.Content = $content, c.CreatedAt = $createdAt, c.LikeCount = $likeCount")
+            .WithParams(new
+            {
+                uuid = uuid,
+                content = comment.Content,
+                createdAt = comment.CreatedAt,
+                likeCount = comment.LikeCount
+            })
+            .Return<Comment>("c")
+            .ResultsAsync;
+
+        return updatedComment.FirstOrDefault();
+    }
+
+    public async Task<Comment> DeleteAsync(string uuid)
+    {
+        var deletedComment = await _graphClient.Cypher
+            .Match("(c:Comment {Uuid: $uuid})")
+            .WithParams(new { uuid })
+            .DetachDelete("c")
+            .Return<Comment>("c") 
+            .ResultsAsync;
+
+        return deletedComment.FirstOrDefault();
+    }
+
+    public async Task<bool> AddCommentLikeAsync(string commentUuid, string userUuid)
+    {
+        var existingLike = await _graphClient.Cypher
+            .Match("(u:User {Uuid: $userUuid})-[r:LIKED]->(c:Comment {Uuid: $commentUuid})")
+            .WithParams(new { userUuid, commentUuid })
+            .Return<int>("count(r)")
+            .ResultsAsync;
+
+        if (existingLike.FirstOrDefault() > 0)
+        {
+            return false;
+        }
+        
+        await _graphClient.Cypher
+            .Match("(u:User {Uuid: $userUuid}), (c:Comment {Uuid: $commentUuid})")
+            .WithParams(new { userUuid, commentUuid })
+            .Create("(u)-[:LIKED]->(c)")
+            .ExecuteWithoutResultsAsync();
 
         return true;
     }
-
-    public async Task<Comment> GetMostLikedForUserAsync(int userId)
+    
+    public async Task<bool> IsUserAuthorizedToChangeComment(string userUuid, string commentUuid)
     {
-        var mostLikedComment = await _keasocialDbContext.Comments
-            .FromSqlInterpolated($"SELECT * FROM Comments WHERE CommentId = GetMostLikedCommentForUser({userId})")
-            .FirstOrDefaultAsync();
+        var userPostCheck = await _graphClient.Cypher
+            .Match("(u:User {Uuid: $userUuid})-[:COMMENTED]->(c:Comment {Uuid: $commentUuid})")
+            .WithParams(new { userUuid, commentUuid })
+            .Return<int>("count(c)")
+            .ResultsAsync;
 
-        return mostLikedComment;
+        return userPostCheck.FirstOrDefault() > 0;
     }
+    
 }

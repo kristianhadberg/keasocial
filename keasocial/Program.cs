@@ -19,12 +19,12 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IUserService, UserService>();
 /*builder.Services.AddScoped<ILectureService, LectureService>();*/
 builder.Services.AddScoped<IPostService, PostService>();
-/*builder.Services.AddScoped<ICommentService, CommentService>();*/
+builder.Services.AddScoped<ICommentService, CommentService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 /*builder.Services.AddScoped<ILectureRepository, LectureRepository>();*/
 builder.Services.AddScoped<IPostRepository, PostRepository>();
-/*builder.Services.AddScoped<ICommentRepository, CommentRepository>();*/
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddSingleton<JwtService>();
 
 builder.Services.AddSingleton<IGraphClient>(provider =>

@@ -12,7 +12,7 @@ namespace keasocial.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<CommentLike> CommentLikes { get; set; }
         public DbSet<PostLike> PostLikes { get; set; }
-        public DbSet<PostLikeView> PostLikeViews { get; set; }
+        /*public DbSet<PostLikeView> PostLikeViews { get; set; }*/
 
         public KeasocialDbContext(DbContextOptions<KeasocialDbContext> options)
             : base(options) {}
@@ -21,9 +21,9 @@ namespace keasocial.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<PostLikeView>()
+            /*modelBuilder.Entity<PostLikeView>()
                 .ToView("PostLikesView")
-                .HasNoKey();
+                .HasNoKey();*/
         }
     }
 }

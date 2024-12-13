@@ -30,7 +30,6 @@ public class PostService : IPostService
         ValidatePostCreateDto(postCreateDto);
         
         var post = new Post
-        
         {
             Content = postCreateDto.Content,
             CreatedAt = DateTime.UtcNow,

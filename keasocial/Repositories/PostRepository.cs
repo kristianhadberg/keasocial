@@ -141,28 +141,4 @@ public class PostRepository : IPostRepository
 
         return userPostCheck.FirstOrDefault() > 0;
     }
-
-    private CommentDto CommentToDto(Comment comment)
-    {
-        return new CommentDto
-        {
-            CommentId = comment.CommentId,
-            UserId = comment.UserId,
-            PostId = comment.PostId,
-            Content = comment.Content,
-            CreatedAt = comment.CreatedAt,
-            LikeCount = comment.LikeCount,
-            CommentLikes = comment.CommentLikes.Select(CommentLikeToDto).ToList()
-        };
-    }
-    
-    private CommentLikeDto CommentLikeToDto(CommentLike commentLike)
-    {
-        return new CommentLikeDto
-        {
-            CommentLikeId = commentLike.CommentLikeId,
-            UserId = commentLike.UserId,
-            CommentId = commentLike.CommentId
-        };
-    }
 }
