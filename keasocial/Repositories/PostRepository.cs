@@ -118,4 +118,10 @@ public class PostRepository : IPostRepository
             CommentId = commentLike.CommentId
         };
     }
+    
+    public async Task<Comment> AddEmbeddedCommentAsync(Comment comment, int postId)
+    {
+        return comment;
+    }
+    
 }

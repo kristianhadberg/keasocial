@@ -9,7 +9,7 @@ public class Comment
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; }
-    public int CommentId { get; set; }
+    public string CommentId { get; set; }
     public int UserId { get; set; }
     public int PostId { get; set; }
     public string Content { get; set; }

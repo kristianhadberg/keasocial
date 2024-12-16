@@ -10,7 +10,7 @@ public class CommentLike
     public string Id { get; set; }
     public int CommentLikeId { get; set; }
     public int UserId { get; set; }
-    public int CommentId { get; set; }
+    public string CommentId { get; set; }
 
     // Navigation properties
     public User User { get; set; }

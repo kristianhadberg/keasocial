@@ -15,12 +15,13 @@ public class CommentRepository : ICommentRepository
         _keasocialDbContext = keasocialDbContext;
     }
     
-    public async Task<Comment> GetAsync(int commentId)
+    public async Task<Comment> GetAsync(string commentId)
     {
        return await _keasocialDbContext.Comments.FindAsync(commentId);
            
     }
     
+
     public async Task<List<CommentDto>> GetAsync()
     {
         return await _keasocialDbContext.Comments
@@ -79,14 +80,14 @@ public class CommentRepository : ICommentRepository
         return commentDto;
     }
 
-    public async Task<Comment> UpdateAsync(int commentId, Comment comment)
+    public async Task<Comment> UpdateAsync(string commentId, Comment comment)
     {
         var existingComment =  _keasocialDbContext.Comments.Update(comment);
         await _keasocialDbContext.SaveChangesAsync();
         return existingComment.Entity;
     }
 
-    public async Task<Comment> DeleteAsync(int commentId)
+    public async Task<Comment> DeleteAsync(string commentId)
     {
         var comment = await _keasocialDbContext.Comments.FindAsync(commentId);
         _keasocialDbContext.Comments.Remove(comment);
@@ -94,7 +95,7 @@ public class CommentRepository : ICommentRepository
         return comment; 
     }
 
-    public async Task<bool> AddCommentLikeAsync(int userId, int commentId, int postId)
+    public async Task<bool> AddCommentLikeAsync(int userId, string commentId, int postId)
     {
         var existingLike = await _keasocialDbContext.CommentLikes
             .FirstOrDefaultAsync(cl => cl.UserId == userId && cl.CommentId == commentId);

@@ -32,7 +32,7 @@ public class CommentController : ControllerBase
 
 
     [HttpGet("{commentId}")]
-    public async Task<ActionResult<Comment>> Get(int postId, int commentId)
+    public async Task<ActionResult<Comment>> Get(int postId, string commentId)
     {
         var comment = await _commentService.GetAsync(commentId, postId);
         if (comment == null || comment.PostId != postId)
@@ -48,12 +48,12 @@ public class CommentController : ControllerBase
     {
 
         var createdComment = await _commentService.CreateAsync(commentCreate, postId);
-        return Ok(createdComment);
+        return CreatedAtAction(nameof(Get), new { postId = postId, createdComment.CommentId }, createdComment);
     }
 
     [Authorize]
     [HttpPut("{commentId}")]
-    public async Task<ActionResult<CommentUpdateDto>> Put(int postId, int commentId, [FromBody] CommentUpdateDto commentUpdate)
+    public async Task<ActionResult<CommentUpdateDto>> Put(int postId, string commentId, [FromBody] CommentUpdateDto commentUpdate)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
         var updatedComment = await _commentService.UpdateAsync(commentId, commentUpdate, userId);
@@ -62,11 +62,11 @@ public class CommentController : ControllerBase
 
     [Authorize]
     [HttpDelete("{commentId}")]
-    public async Task<ActionResult> Delete(int postId, int commentId)
+    public async Task<ActionResult> Delete(int postId, string commentId)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
         
-        if (postId == 0 || commentId == 0)
+        if (postId == 0 || commentId == null)
         {
             return BadRequest("Invalid post or comment ID.");
         }
@@ -77,7 +77,7 @@ public class CommentController : ControllerBase
 
     [Authorize]
     [HttpPost("{commentId}/like")]
-    public async Task<ActionResult> Like(int postId, int commentId)
+    public async Task<ActionResult> Like(int postId, string commentId)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
         await _commentService.AddCommentLikeAsync(userId, commentId, postId);

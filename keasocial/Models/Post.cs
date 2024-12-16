@@ -17,6 +17,8 @@ public class Post
 
     // Navigation properties
     public User User { get; set; }
-    public ICollection<Comment> Comments { get; set; }
+    
+    public List<Comment> Comments { get; set; } = new List<Comment>();
+
     public ICollection<PostLike> PostLikes { get; set; }
 }

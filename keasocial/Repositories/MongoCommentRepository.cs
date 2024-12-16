@@ -17,7 +17,7 @@ public class MongoCommentRepository : ICommentRepository
         _commentLikes = database.GetCollection<CommentLike>("CommentLikes");
     }
 
-    public async Task<Comment> GetAsync(int commentId)
+    public async Task<Comment> GetAsync(string commentId)
     {
         return await _comments.Find(c => c.CommentId == commentId).FirstOrDefaultAsync();
     }
@@ -72,7 +72,7 @@ public class MongoCommentRepository : ICommentRepository
         };
     }
 
-    public async Task<Comment> UpdateAsync(int commentId, Comment comment)
+    public async Task<Comment> UpdateAsync(string commentId, Comment comment)
     {
         var result = await _comments.ReplaceOneAsync(c => c.CommentId == commentId, comment);
         if (result.MatchedCount == 0)
@@ -82,7 +82,7 @@ public class MongoCommentRepository : ICommentRepository
         return comment;
     }
 
-    public async Task<Comment> DeleteAsync(int commentId)
+    public async Task<Comment> DeleteAsync(string commentId)
     {
         var result = await _comments.FindOneAndDeleteAsync(c => c.CommentId == commentId);
         if (result == null)
@@ -92,7 +92,7 @@ public class MongoCommentRepository : ICommentRepository
         return result;
     }
 
-    public async Task<bool> AddCommentLikeAsync(int userId, int commentId, int postId)
+    public async Task<bool> AddCommentLikeAsync(int userId, string commentId, int postId)
     {
         var existingLike = await _commentLikes.Find(cl => cl.UserId == userId && cl.CommentId == commentId).FirstOrDefaultAsync();
 

@@ -44,6 +44,24 @@ public class MongoPostRepository : IPostRepository
         await _posts.InsertOneAsync(post);
         return post;
     }
+    
+    public async Task<Comment> AddEmbeddedCommentAsync(Comment comment, int postId)
+    {
+        
+        var update = Builders<Post>.Update.Push(p => p.Comments, comment);
+        var result = await _posts.UpdateOneAsync(
+            p => p.PostId == postId,
+            update
+        );
+
+        if (result.MatchedCount == 0)
+        {
+            throw new KeyNotFoundException($"Post with ID {postId} not found.");
+        }
+
+        return comment;
+    }
+    
 
     public async Task<Post> UpdateAsync(int id, Post post)
     {
@@ -124,4 +142,5 @@ public class MongoPostRepository : IPostRepository
             CommentId = commentLike.CommentId
         };
     }
+    
 }

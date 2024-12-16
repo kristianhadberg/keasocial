@@ -16,7 +16,7 @@ public class CommentService : ICommentService
         _postRepository = postRepository;
     }
     
-    public async Task<Comment> GetAsync(int commentId, int postId)
+    public async Task<Comment> GetAsync(string commentId, int postId)
     {
         var comment = await _commentRepository.GetAsync(commentId);
         if (comment == null || comment.PostId != postId)
@@ -71,13 +71,24 @@ public class CommentService : ICommentService
             CreatedAt = DateTime.UtcNow,
             LikeCount = 0 
         };
-
+        
+        var createdComment = await _postRepository.AddEmbeddedCommentAsync(comment, postId);
+        
+        return new CommentDto()
+        {
+            CommentId = createdComment.CommentId,
+            UserId = createdComment.UserId,
+            Content = createdComment.Content,
+            CreatedAt = createdComment.CreatedAt,
+            LikeCount = createdComment.LikeCount
+        };
+        
         return await _commentRepository.CreateAsync(comment);
     }
 
 
     
-    public async Task<Comment> UpdateAsync(int id, CommentUpdateDto commentUpdateDto, int userId)
+    public async Task<Comment> UpdateAsync(string id, CommentUpdateDto commentUpdateDto, int userId)
     {
         if (string.IsNullOrWhiteSpace(commentUpdateDto.Content) || commentUpdateDto.Content.Length < 5 || commentUpdateDto.Content.Length > 200)
         {
@@ -102,7 +113,7 @@ public class CommentService : ICommentService
         return updatedComment;
     }
     
-    public async Task<Comment> DeleteAsync(int commentId, int postId, int userId)
+    public async Task<Comment> DeleteAsync(string commentId, int postId, int userId)
     {
         var comment = await _commentRepository.GetAsync(commentId);
 
@@ -120,7 +131,7 @@ public class CommentService : ICommentService
     }
     
 
-    public async Task<bool> AddCommentLikeAsync(int userId, int commentId, int postId)
+    public async Task<bool> AddCommentLikeAsync(int userId, string commentId, int postId)
     {
         var commentExists = await _commentRepository.GetAsync(commentId);
 
