@@ -16,6 +16,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON Lectures TO 'application_user'@'%';
 GRANT SELECT, INSERT, UPDATE, DELETE ON PostLikes TO 'application_user'@'%';
 GRANT SELECT, INSERT, UPDATE, DELETE ON Posts TO 'application_user'@'%';
 GRANT SELECT, INSERT, UPDATE, DELETE ON Users TO 'application_user'@'%';
+GRANT CREATE VIEW, SHOW VIEW, SELECT ON * TO 'application_user'@'%';
+GRANT CREATE ROUTINE, EXECUTE ON * to 'application_user'@'%';
 
 -- READ ONLY USER
 CREATE USER 'readonly'@'%' IDENTIFIED BY 'readonly_password';
