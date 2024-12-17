@@ -98,42 +98,9 @@ Here:
 ---
 
 ### Seeding Mock Data in MongoDB
-To test the application, you can insert some mock data into MongoDB:
+The application is set up to automatically insert mock data the first time the application is run. If more is needed it can modified into the MongoDbSeeder.cs:
 
-1. Open a MongoDB shell or GUI (like Compass).
-2. Insert mock documents into the `Posts` and `Comments` collections:
 
-```javascript
-db.Posts.insertMany([
-  {
-    "PostId": 1,
-    "UserId": 1,
-    "Content": "Hello, this is my first post!",
-    "CreatedAt": new Date(),
-    "LikeCount": 0,
-    "Comments": []
-  },
-  {
-    "PostId": 2,
-    "UserId": 2,
-    "Content": "Anyone going to the lecture tomorrow?",
-    "CreatedAt": new Date(),
-    "LikeCount": 0,
-    "Comments": []
-  }
-]);
-
-db.Comments.insertMany([
-  {
-    "CommentId": 1,
-    "PostId": 1,
-    "UserId": 2,
-    "Content": "Welcome to the platform!",
-    "CreatedAt": new Date(),
-    "LikeCount": 0
-  }
-]);
-```
 
 ---
 
@@ -149,25 +116,3 @@ db.Comments.insertMany([
 | `/api/{postId}/comments/{id}` | DELETE     | Delete a specific comment.               |
 
 ---
-
-### Troubleshooting
-
-1. **MongoDB Connection Error**:
-   - Ensure MongoDB is running (`docker ps` to check the container).
-   - Verify the connection string in `appsettings.json`.
-
-2. **Port Conflicts**:
-   - If port `27017` is in use, change the port mapping in the Docker command:
-     ```bash
-     -p 27018:27017
-     ```
-
-3. **Seed Data Not Showing**:
-   - Use MongoDB Compass or a shell to verify the data in the correct database.
-
----
-
-### Conclusion
-This application combines relational, document, and graph databases to showcase the flexibility and power of modern database systems. By running MongoDB alongside our C# ASP.NET Core application, we achieved a scalable and adaptable backend capable of handling unstructured and hierarchical data.
-
-Let me know if you need further clarification or assistance with setup! 🚀
