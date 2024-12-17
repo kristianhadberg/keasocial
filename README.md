@@ -17,7 +17,7 @@ The application uses **three types of databases** to demonstrate their respectiv
 ---
 
 ## Technology Stack
-- **Backend Framework**: ASP.NET Core 6.0
+- **Backend Framework**: ASP.NET Core 8.0
 - **Programming Language**: C#
 - **Databases**:
    - MySQL (Relational)
