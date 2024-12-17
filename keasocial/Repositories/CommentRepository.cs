@@ -116,5 +116,12 @@ public class CommentRepository : ICommentRepository
         return true;
     }
 
-    
+    public async Task<Comment> GetMostLikedForUserAsync(int userId)
+    {
+        var mostLikedComment = await _keasocialDbContext.Comments
+            .FromSqlInterpolated($"SELECT * FROM Comments WHERE CommentId = GetMostLikedCommentForUser({userId})")
+            .FirstOrDefaultAsync();
+
+        return mostLikedComment;
+    }
 }

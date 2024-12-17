@@ -83,4 +83,12 @@ public class CommentController : ControllerBase
         await _commentService.AddCommentLikeAsync(userId, commentId, postId);
         return Ok("Comment liked successfully.");
     }
+
+    [HttpGet]
+    [Route("~/api/[controller]/most-liked/{userId}")]
+    public async Task<ActionResult<Comment>> GetMostLikedByUserId(int userId)
+    {
+        var comment = await _commentService.GetMostLikedForUserAsync(userId);
+        return Ok(comment);
+    }
 }

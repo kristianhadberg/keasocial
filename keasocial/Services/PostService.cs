@@ -30,7 +30,6 @@ public class PostService : IPostService
         ValidatePostCreateDto(postCreateDto);
         
         var post = new Post
-        
         {
             UserId = postCreateDto.UserId,
             Content = postCreateDto.Content,
@@ -103,6 +102,11 @@ public class PostService : IPostService
     public async Task<List<PostLikeView>> GetPostLikesAsync(int postId)
     {
         return await _postRepository.GetPostLikesAsync(postId);
+    }
+
+    public async Task<List<PostDto>> GetMostLikedPostsAsync()
+    {
+        return await _postRepository.GetMostLikedPostsAsync();
     }
 
     public void ValidatePostCreateDto(PostCreateDto postCreateDto)

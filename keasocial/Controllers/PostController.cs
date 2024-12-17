@@ -39,7 +39,6 @@ public class PostController : ControllerBase
     {
         var createdPost = await _postService.CreateAsync(postCreate);
         return CreatedAtAction(nameof(Get), new { id = createdPost.PostId }, createdPost);
-        return Ok(createdPost);
     }
     
     [Authorize]
@@ -67,6 +66,13 @@ public class PostController : ControllerBase
     {
         var postLikeView = await _postService.GetPostLikesAsync(postId);
         return Ok(postLikeView);
+    }
+
+    [HttpGet("most-liked")]
+    public async Task<ActionResult<List<PostDto>>> GetMostLikedPosts()
+    {
+        var mostLikedPosts = await _postService.GetMostLikedPostsAsync();
+        return Ok(mostLikedPosts);
     }
 
     [Authorize]

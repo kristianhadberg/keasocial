@@ -14,6 +14,7 @@ public interface IPostRepository
     Task<Post> DeleteAsync(int id);
     Task<bool> AddPostLikeAsync(int userId, int postId);
     Task<List<PostLikeView>> GetPostLikesAsync(int postId);
+    Task<List<PostDto>> GetMostLikedPostsAsync();
 
 
 }
