@@ -40,7 +40,12 @@ Before running the project, ensure you have the following installed:
 
 ## How to Run the Application (MongoDB Configuration)
 
-### 1. Start MongoDB in a Docker Container
+### 1. Switch to the 'MongoDb' branch in the repository.
+```bash
+git checkout MongoDb
+```
+
+### 2. Start MongoDB in a Docker Container
 To run MongoDB in Docker, use the following command:
 
 ```bash
@@ -54,7 +59,7 @@ This will:
 
 ---
 
-### 2. Update the Connection String
+### 3. Update the Connection String
 Edit the `appsettings.json` file in your project to include the MongoDB configuration:
 
 ```json
@@ -74,7 +79,7 @@ Here:
 
 ---
 
-### 3. Build and Run the Application
+### 4. Build and Run the Application
 
 1. **Restore Dependencies**:
    Open a terminal in the project folder and run:
