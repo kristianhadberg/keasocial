@@ -30,7 +30,6 @@ public class PostService : IPostService
         ValidatePostCreateDto(postCreateDto);
         
         var post = new Post
-        
         {
             UserId = postCreateDto.UserId,
             Content = postCreateDto.Content,

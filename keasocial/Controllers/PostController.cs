@@ -39,7 +39,6 @@ public class PostController : ControllerBase
     {
         var createdPost = await _postService.CreateAsync(postCreate);
         return CreatedAtAction(nameof(Get), new { id = createdPost.PostId }, createdPost);
-        return Ok(createdPost);
     }
     
     [Authorize]
