@@ -14,9 +14,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 using MongoDB.Driver;
-
-using MongoDB.Driver;
-using keasocial.Models;
 using System.Collections.Generic;
 using MongoDB.Bson;
 
@@ -132,11 +129,10 @@ var useMongoDb = builder.Configuration.GetValue<bool>("DatabaseConfig:UseMongoDB
 
 if (useMongoDb)
 {
-    // Configure MongoDB
+    
     var mongoConnectionString = builder.Configuration.GetSection("ConnectionStrings:MongoDB:ConnectionString").Value;
     var mongoDatabaseName = builder.Configuration.GetSection("ConnectionStrings:MongoDB:DatabaseName").Value;
-
-    // Register MongoDB services
+    
     builder.Services.AddSingleton<IMongoClient>(s => new MongoClient(mongoConnectionString));
     builder.Services.AddSingleton(s =>
     {
