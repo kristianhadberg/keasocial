@@ -1,5 +1,5 @@
 
-# Social Network and Lecture Management Backend System
+# KEASOCIAL
 
 ---
 
