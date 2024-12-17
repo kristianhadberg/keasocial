@@ -115,4 +115,57 @@ The application is set up to automatically insert mock data the first time the a
 | `/api/{postId}/comments`      | POST       | Add a comment to a specific post.        |
 | `/api/{postId}/comments/{id}` | DELETE     | Delete a specific comment.               |
 
+---               |
+
 ---
+
+## How to Run the Application (Neo4j Configuration)
+
+This section provides instructions for running Neo4j in a Docker container and configuring it for integration with the **KEASOCIAL** backend application.
+
+### 1. Start Neo4j in a Docker Container
+To run Neo4j in Docker, use the following command:
+
+```bash
+docker run --name neo4j-keasocial -d -p 7687:7687 -p 7474:7474 -e NEO4J_AUTH=neo4j/password neo4j:latest
+```
+
+### 2. Switch to the 'neo4j' branch in the repository.
+```bash
+git checkout neo4j
+```
+
+### 3. Update the Connection String
+Edit the `appsettings.json` file in your project to include the Neo4J configuration:
+
+```json
+  "Neo4j": {
+    "Uri": "bolt://localhost:7687",
+    "Username": "neo4j",
+    "Password": "password"
+  },
+```
+
+### 4. Build and Run the Application
+
+1. **Restore Dependencies**:
+   Open a terminal in the project folder and run:
+   ```bash
+   dotnet restore
+   ```
+
+2. **Run the Application**:
+   Start the application using:
+   ```bash
+   dotnet run
+   ```
+
+
+
+---
+
+### Seeding Mock Data in Neo4j
+To seed the database with data, copy the Cypher script from 'keasocial/cypher/datagen.txt'
+You can run this cypher script in the neo4j browser available at 'http://localhost:7474/browser' when your neo4j docker container is running.
+This script will seed the database with nodes and create the needed relationships between nodes.
+
