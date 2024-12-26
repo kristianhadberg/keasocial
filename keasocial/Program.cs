@@ -30,6 +30,11 @@ var commentsCollection = database.GetCollection<Comment>("Comments");
 var postLikesCollection = database.GetCollection<PostLike>("PostLikes");
 var commentLikesCollection = database.GetCollection<CommentLike>("CommentLikes");
 
+// Initialize the counter helper
+var dbHelper = new MongoCounter(database);
+await dbHelper.InitializeCounter("PostId");
+await dbHelper.InitializeCounter("CommentId");
+
 // Clear existing data
 await usersCollection.DeleteManyAsync(_ => true);
 await calendarsCollection.DeleteManyAsync(_ => true);
@@ -119,6 +124,7 @@ var commentLikes = new List<CommentLike>
     new CommentLike { CommentId = "4", UserId = 4 }
 };
 await commentLikesCollection.InsertManyAsync(commentLikes);
+
 
 Console.WriteLine("Data seeding completed successfully.");
 Console.WriteLine("MongoDB seeding completed successfully.");

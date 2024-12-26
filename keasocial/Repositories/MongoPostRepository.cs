@@ -10,11 +10,13 @@ public class MongoPostRepository : IPostRepository
 {
     private readonly IMongoCollection<Post> _posts;
     private readonly IMongoCollection<PostLike> _postLikes;
+    private readonly MongoCounter _dbHelper;
 
     public MongoPostRepository(IMongoDatabase database)
     {
         _posts = database.GetCollection<Post>("Posts");
         _postLikes = database.GetCollection<PostLike>("PostLikes");
+        _dbHelper = new MongoCounter(database);
     }
 
     public async Task<Post> GetAsync(int id)
@@ -41,6 +43,10 @@ public class MongoPostRepository : IPostRepository
 
     public async Task<Post> CreateAsync(Post post)
     {
+        // Fetch the next PostId
+        post.PostId = await _dbHelper.GetNextSequenceValue("PostId");
+        post.CreatedAt = DateTime.UtcNow;
+
         await _posts.InsertOneAsync(post);
         return post;
     }
