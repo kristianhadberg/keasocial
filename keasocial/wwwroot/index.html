@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Keasocial</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <h1>Keasocial</h1>
+
+    <div id="input">
+
+        <form id="get-post-form">
+            <span>Enter a post id to fetch it</span>
+            <input type="number" name="number" value="" />
+            <input type="submit" value="getPost"></input>
+        </form>
+
+        <button id="get-all-posts" type="button">Get all posts</button>
+        
+        <button id="clear-posts" type="button">Clear posts</button>
+
+    </div>
+
+<section id="post-section">
+    <h2>Posts:</h2>
+    
+    <div id="output"></div>
+</section>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
