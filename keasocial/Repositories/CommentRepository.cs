@@ -51,6 +51,7 @@ public class CommentRepository : ICommentRepository
                 LikeCount = c.LikeCount,
                 CommentLikes = c.CommentLikes.Select(cl => new CommentLikeDto
                 {
+                    CommentLikeId = cl.CommentLikeId,
                     UserId = cl.UserId,
                     CommentId = cl.CommentId
                 }).ToList()
