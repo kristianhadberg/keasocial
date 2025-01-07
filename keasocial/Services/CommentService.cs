@@ -72,7 +72,9 @@ public class CommentService : ICommentService
             LikeCount = 0 
         };
         
-        var createdComment = await _postRepository.AddEmbeddedCommentAsync(comment, postId);
+        await _postRepository.AddEmbeddedCommentAsync(comment, postId);
+
+        var createdComment = await _commentRepository.CreateAsync(comment);
         
         return new CommentDto()
         {
@@ -83,7 +85,7 @@ public class CommentService : ICommentService
             LikeCount = createdComment.LikeCount
         };
         
-        return await _commentRepository.CreateAsync(comment);
+        
     }
 
 
