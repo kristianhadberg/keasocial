@@ -2,6 +2,7 @@ using keasocial.Dto;
 using keasocial.Models;
 using keasocial.Repositories.Interfaces;
 using keasocial.Services.Interfaces;
+using MongoDB.Bson;
 
 namespace keasocial.Services;
 
@@ -65,6 +66,7 @@ public class CommentService : ICommentService
         
         var comment = new Comment
         {
+            Id = ObjectId.GenerateNewId().ToString(),
             PostId = postId,
             UserId = commentCreateDto.UserId,
             Content = commentCreateDto.Content,
@@ -75,7 +77,7 @@ public class CommentService : ICommentService
         await _postRepository.AddEmbeddedCommentAsync(comment, postId);
 
         var createdComment = await _commentRepository.CreateAsync(comment);
-        
+
         return new CommentDto()
         {
             CommentId = createdComment.CommentId,
