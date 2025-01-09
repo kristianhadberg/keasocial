@@ -1,27 +1,52 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
 name: Continuous integration keasocial
 
 on:
-  push:
-    branches: ["master"]
-  pull_request:
-    branches: ["master"]
+    push:
+        branches: ["sonarcloud"]
+    pull_request:
+        branches: ["sonarcloud"]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    build:
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-      - name: Restore dependencies
-        run: dotnet restore
-      - name: Build
-        run: dotnet build --no-restore
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
+        steps:
+            # Step 1: Check out the code
+            - uses: actions/checkout@v4
+
+            # Step 2: Set up .NET
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: 8.0.x
+
+            # Step 3: Restore dependencies
+            - name: Restore dependencies
+              run: dotnet restore
+
+            # Step 4: Build the project
+            - name: Build
+              run: dotnet build --no-restore
+
+            # Step 5: Run tests
+            - name: Test
+              run: dotnet test --no-build --verbosity normal
+
+            # Step 6: Set up SonarCloud scanner
+            - name: Install SonarQube Cloud scanner
+              run: |
+                  dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+
+            # Step 7: Run SonarCloud analysis
+            - name: SonarCloud Analysis
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+              run: |
+                  ./.sonar/scanner/dotnet-sonarscanner begin \
+                    /k:"kristianhadberg_keasocial" \
+                    /o:"kristianhadberg" \
+                    /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+                    /d:sonar.host.url="https://sonarcloud.io"
+                  dotnet build
+                  dotnet test --collect:"XPlat Code Coverage" --verbosity normal # Include code coverage
+                  ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
