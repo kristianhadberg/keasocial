@@ -25,45 +25,6 @@ public class UserServiceTest
         _userService = new UserService(_userRepositoryMock.Object, jwtService);
     }
     
-    /*
-     *  Maybe we can use this old test further down the line
-     *  as inspiration for integration tests 
-     */
-    
-    /*[Theory]
-    [InlineData("J")]
-    [InlineData("Jo")]
-    [InlineData("John Geronimo Doe Johnson")]
-    [InlineData("JimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimm")] // 49 char name
-    [InlineData("JimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmyJimmy")] // 50 char name
-    public async void Test_CreateUser_Name_ShouldBe_SpecificLength(string name)
-    {
-        var userCreateDto = new UserCreateDto
-        {
-            Name = name,
-            Email = "john@example.com",
-            Password = "testpassword"
-        };
-
-        var createdUser = new User
-        {
-            UserId = 1,
-            Name = userCreateDto.Name,
-            Email = userCreateDto.Email,
-            Password = userCreateDto.Password
-        };
-        
-        _userRepositoryMock.Setup(repo => repo.GetByEmailAsync(userCreateDto.Email))
-            .ReturnsAsync((User)null);
-        _userRepositoryMock.Setup(repo => repo.Create(It.IsAny<User>())).ReturnsAsync(createdUser);
-        
-        var result = await _userService.Create(userCreateDto);
-        Assert.Equal(createdUser.Name, result.Name);
-        
-        // Verifies that the mock repository is actually used
-        _userRepositoryMock.Verify(repo => repo.GetByEmailAsync(It.IsAny<string>()), Times.Once);
-    }*/
-    
     [Theory]
     [InlineData("J")]
     [InlineData("Jo")]
