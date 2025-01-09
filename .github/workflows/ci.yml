@@ -38,7 +38,7 @@ jobs:
                     /o:"kristianhadberg" \
                     /d:sonar.host.url="https://sonarcloud.io" \
                     /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
-                    /d:sonar.cs.opencover.reportsPaths="**/TestResults/*/coverage.opencover.xml"
+                    /d:sonar.cs.opencover.reportsPaths="TestResults/**/*.xml"
 
             # Step 6: Build the project
             - name: Build
