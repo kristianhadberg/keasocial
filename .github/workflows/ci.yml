@@ -32,8 +32,8 @@ jobs:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
               run: |
                   ./.sonar/scanner/dotnet-sonarscanner begin \
-                    /k:"your_project_key" \
-                    /o:"your_organization_key" \
+                    /k:"kristianhadberg_keasocial" \
+                    /o:"kristianhadberg" \
                     /d:sonar.host.url="https://sonarcloud.io" \
                     /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
                     /d:sonar.cs.opencover.reportsPaths="**/TestResults/*/coverage.opencover.xml"
