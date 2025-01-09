@@ -1,10 +1,12 @@
-name: Continuous integration keasocial
+name: Continuous Integration with SonarCloud
 
 on:
     push:
-        branches: ["master"]
+        branches:
+            - master
     pull_request:
-        branches: ["master"]
+        branches:
+            - master
 
 jobs:
     build:
@@ -18,35 +20,34 @@ jobs:
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
               with:
-                  dotnet-version: 8.0.x
+                  dotnet-version: "8.0.x"
 
-            # Step 3: Restore dependencies
-            - name: Restore dependencies
-              run: dotnet restore
+            # Step 3: Install SonarCloud Scanner
+            - name: Install SonarCloud Scanner
+              run: dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
 
-            # Step 4: Build the project
-            - name: Build
-              run: dotnet build --no-restore
-
-            # Step 5: Run tests
-            - name: Test
-              run: dotnet test --no-build --verbosity normal
-
-            # Step 6: Set up SonarCloud scanner
-            - name: Install SonarQube Cloud scanner
-              run: |
-                  dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
-
-            # Step 7: Run SonarCloud analysis
-            - name: SonarCloud Analysis
+            # Step 4: Begin SonarCloud Analysis
+            - name: SonarCloud Begin
               env:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
               run: |
                   ./.sonar/scanner/dotnet-sonarscanner begin \
-                    /k:"kristianhadberg_keasocial" \
-                    /o:"kristianhadberg" \
+                    /k:"your_project_key" \
+                    /o:"your_organization_key" \
+                    /d:sonar.host.url="https://sonarcloud.io" \
                     /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
-                    /d:sonar.host.url="https://sonarcloud.io"
-                  dotnet build
-                  dotnet test --collect:"XPlat Code Coverage" --verbosity normal # Include code coverage
-                  ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+                    /d:sonar.cs.opencover.reportsPaths="**/TestResults/*/coverage.opencover.xml"
+
+            # Step 5: Build the Project
+            - name: Build
+              run: dotnet build --no-restore
+
+            # Step 6: Run Tests with Coverage
+            - name: Test with Coverage
+              run: dotnet test --collect:"XPlat Code Coverage" --verbosity normal
+
+            # Step 7: End SonarCloud Analysis
+            - name: SonarCloud End
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+              run: ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
