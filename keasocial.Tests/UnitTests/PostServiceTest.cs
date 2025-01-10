@@ -4,7 +4,7 @@ using keasocial.Repositories.Interfaces;
 using keasocial.Services;
 using Moq;
 
-namespace keasocial.Tests;
+namespace keasocial.Tests.UnitTests;
 
 public class PostServiceTest
 {

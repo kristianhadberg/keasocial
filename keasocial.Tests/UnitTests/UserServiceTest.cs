@@ -5,7 +5,7 @@ using keasocial.Services;
 using Microsoft.Extensions.Configuration;
 using Moq;
 
-namespace keasocial.Tests;
+namespace keasocial.Tests.UnitTests;
 
 public class UserServiceTest
 {
