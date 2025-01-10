@@ -13,7 +13,7 @@ public class PostControllerTest : IntegrationTestSetup
         var response = await TestClient.GetAsync("api/Post");
 
         /*var posts = await response.Content.ReadFromJsonAsync<List<PostDto>>();*/
-        var posts = await response.Content.ReadAsAsync<List<PostDto>>();
+        var posts = await response.Content.ReadAsAsync<List<Post>>();
 
         Assert.NotNull(response);
         Assert.Empty(posts);
