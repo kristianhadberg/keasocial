@@ -4,6 +4,8 @@ using System.Net.Http.Json;
 using keasocial.Data;
 using keasocial.Dto;
 using keasocial.Models;
+using keasocial.Services;
+using keasocial.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +46,7 @@ public class IntegrationTestSetup
         
         var TestDatabaseName = $"TestDb_{Guid.NewGuid()}";
 
-        var appFactory = new WebApplicationFactory<Program>()
+        /*var appFactory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
             {
                 builder.UseSetting("ASPNETCORE_ENVIRONMENT", "Testing"); // Or "Testing"
@@ -68,6 +70,42 @@ public class IntegrationTestSetup
                     var context = scope.ServiceProvider.GetRequiredService<KeasocialDbContext>();
                     context.Database.EnsureCreated();
                     Console.WriteLine("Database schema created successfully");
+                });
+            });*/
+        
+        var appFactory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.UseSetting("ASPNETCORE_ENVIRONMENT", "Testing");
+                builder.ConfigureServices(services =>
+                {
+                    // Remove all existing DbContext registrations
+                    var descriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(DbContextOptions<KeasocialDbContext>));
+                    if (descriptor != null)
+                    {
+                        services.Remove(descriptor);
+                    }
+
+                    // Register the in-memory database
+                    services.AddDbContext<KeasocialDbContext>(options =>
+                        options.UseInMemoryDatabase(TestDatabaseName));
+
+                    // Remove existing service registrations if needed
+                    services.RemoveAll<IPostService>();
+                    services.RemoveAll<IUserService>();
+
+                    // Register the required services
+                    services.AddTransient<IPostService, PostService>(); // Replace with a mock if needed
+                    services.AddTransient<IUserService, UserService>();
+
+                    // Ensure the database is created
+                    var serviceProvider = services.BuildServiceProvider();
+                    using var scope = serviceProvider.CreateScope();
+                    var context = scope.ServiceProvider.GetRequiredService<KeasocialDbContext>();
+                    context.Database.EnsureCreated();
+
+                    // Optional: Seed the database with initial data
                 });
             });
         
