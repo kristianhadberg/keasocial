@@ -17,7 +17,7 @@ public class PostControllerTest : IntegrationTestSetup
         Console.WriteLine($"Response Content: {rawResponse}");
         
         /*var posts = await response.Content.ReadFromJsonAsync<List<PostDto>>();*/
-        var posts = await response.Content.ReadAsAsync<List<Post>>();
+        var posts = await response.Content.ReadAsAsync<List<PostDto>>();
 
         Assert.NotNull(response);
         Assert.Empty(posts);
