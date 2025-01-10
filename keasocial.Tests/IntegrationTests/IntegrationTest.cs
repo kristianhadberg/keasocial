@@ -47,7 +47,7 @@ public class IntegrationTestSetup
         var appFactory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
             {
-                builder.UseSetting("ASPNETCORE_ENVIRONMENT", "Development"); // Or "Testing"
+                builder.UseSetting("ASPNETCORE_ENVIRONMENT", "Testing"); // Or "Testing"
                 builder.ConfigureServices(services =>
                 {
                     // Remove all existing DbContext registrations

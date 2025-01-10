@@ -108,6 +108,11 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+        
+        if (app.Environment.IsEnvironment("Testing"))
+        {
+            app.UseDeveloperExceptionPage();
+        }
 
 
         app.UseMiddleware<ErrorHandlingMiddleware>();
