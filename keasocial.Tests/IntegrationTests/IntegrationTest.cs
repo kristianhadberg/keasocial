@@ -77,6 +77,8 @@ public class IntegrationTestSetup
         
         TestClient = appFactory.CreateClient();
         
+        Console.WriteLine($"TestClient BaseAddress: {TestClient.BaseAddress}");
+        
     }
 
     private void SeedTestData(KeasocialDbContext context)
