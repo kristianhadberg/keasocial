@@ -30,8 +30,8 @@ jobs:
       # Step 4: Run Postman Collection with Newman
       - name: Run API Tests
         run: |
-          newman run postman/Keasocial.postman_collection.json \
-          --environment postman/keasocial.postman_environment.json \
+          newman run keasocial.Tests/postman/Keasocial.postman_collection.json \
+          --environment keasocial.Tests/postman/keasocial.postman_environment.json \
           --reporters cli,junit \
           --reporter-junit-export TestResults/newman-api-tests.xml
 
