@@ -136,6 +136,11 @@
 							"    console.error(\"JWT token not found in response.\");",
 							"}",
 							"",
+							"pm.test(\"Save JWT token to environment\", function () {",
+							"    let jsonData = pm.response.json();",
+							"    pm.environment.set(\"jwt_token\", jsonData.token);",
+							"});",
+							"",
 							"console.log(\"JWT Token from Environment:\", pm.environment.get(\"jwt_token\"));"
 						],
 						"type": "text/javascript",
