@@ -116,10 +116,7 @@ public class Program
 
 
         app.UseMiddleware<ErrorHandlingMiddleware>();
-        if (!app.Environment.IsEnvironment("Testing"))
-        {
-            app.UseHttpsRedirection();
-        }
+        app.UseHttpsRedirection();
 
         app.UseDefaultFiles();   // Serve the default file, usually index.html or default.html
         app.UseStaticFiles();   // Serve static files (CSS, JS, etc.)
