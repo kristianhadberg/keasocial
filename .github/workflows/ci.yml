@@ -61,3 +61,31 @@ jobs:
               with:
                   name: code-coverage-report
                   path: TestResults/**/coverage.opencover.xml
+
+            # Step 10: Set up Node.js for Newman
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '16'
+
+            # Step 11: Install Newman
+            - name: Install Newman
+              run: npm install -g newman
+
+            # Step 12: Run Postman Collection Tests
+            - name: Run API Tests
+              env:
+                  BASE_URL: ${{ secrets.BASE_URL }} # Set your API base URL as a secret
+              run: |
+                  newman run Updated_Keasocial.postman_collection.json \
+                  --environment keasocial.postman_environment.json \
+                  --reporters cli,junit \
+                  --reporter-junit-export TestResults/newman-api-tests.xml
+
+            # Step 13: Upload API Test Results
+            - name: Upload API Test Results
+              if: always()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: api-test-results
+                  path: TestResults/newman-api-tests.xml

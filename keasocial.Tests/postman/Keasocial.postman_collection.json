@@ -1,0 +1,1297 @@
+{
+	"info": {
+		"_postman_id": "35729e7d-e20e-4028-841a-fc578351358e",
+		"name": "Keasocial",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23142772"
+	},
+	"item": [
+		{
+			"name": "Register User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test that the response status code is 201 (Created)",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"",
+							"",
+							"// Parse the response JSON",
+							"let responseJson = pm.response.json();",
+							"",
+							"// Test that the response contains the expected properties",
+							"pm.test(\"Response contains user details\", function () {",
+							"    pm.expect(responseJson).to.have.property(\"userId\");",
+							"    pm.expect(responseJson).to.have.property(\"name\");",
+							"    pm.expect(responseJson).to.have.property(\"email\");",
+							"});",
+							"",
+							"// Test that the returned user details match the request body",
+							"pm.test(\"Response matches registered user details\", function () {",
+							"    let requestBody = pm.request.body ? JSON.parse(pm.request.body.raw) : {};",
+							"    pm.expect(responseJson.name).to.eql(requestBody.name);",
+							"    pm.expect(responseJson.email).to.eql(requestBody.email);",
+							"});",
+							"",
+							"// Optional: Test response time",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"John Doe\", \"email\": \"johntest1@example.com\", \"password\": \"password123\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}User/register",
+					"host": [
+						"{{BASE_URL}}User"
+					],
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Login response contains necessary fields\", function () {",
+							"    let jsonData = pm.response.json();",
+							"",
+							"    // Validate the presence of name, email, and token",
+							"    pm.expect(jsonData).to.have.property(\"name\");",
+							"    pm.expect(jsonData).to.have.property(\"email\");",
+							"    pm.expect(jsonData).to.have.property(\"token\");",
+							"",
+							"    // Save the token and other user details in environment variables",
+							"    pm.environment.set(\"jwt_token\", jsonData.token); // Save token",
+							"    pm.environment.set(\"user_name\", jsonData.name); // Save name",
+							"    pm.environment.set(\"user_email\", jsonData.email); // Save email",
+							"});",
+							"",
+							"// Decode JWT token",
+							"let jwtToken = pm.environment.get(\"jwt_token\");",
+							"if (jwtToken) {",
+							"    let tokenParts = jwtToken.split('.');",
+							"",
+							"    if (tokenParts.length === 3) {",
+							"        let payload = JSON.parse(atob(tokenParts[1])); // Decode payload part",
+							"",
+							"        // Log the decoded payload for debugging",
+							"        console.log(\"Decoded JWT Payload:\", payload);",
+							"",
+							"        // Validate specific claims in the token",
+							"        pm.test(\"Token contains user ID\", function () {",
+							"            pm.expect(payload).to.have.property(\"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier\");",
+							"        });",
+							"",
+							"        pm.test(\"Token contains email claim\", function () {",
+							"            pm.expect(payload).to.have.property(\"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name\");",
+							"        });",
+							"",
+							"        pm.test(\"Token contains expiry (exp)\", function () {",
+							"            pm.expect(payload).to.have.property(\"exp\");",
+							"        });",
+							"    } else {",
+							"        console.error(\"Invalid JWT token format.\");",
+							"    }",
+							"} else {",
+							"    console.error(\"JWT token not found in response.\");",
+							"}",
+							"",
+							"console.log(\"JWT Token from Environment:\", pm.environment.get(\"jwt_token\"));"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "thisisaverysecureandlongkey12345",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"johntest@example.com\",\n    \"password\": \"password123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}User/login",
+					"host": [
+						"{{BASE_URL}}User"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test that the response status code is 201 (Created)",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"// Test the response body structure",
+							"pm.test(\"Response is a single post object\", function () {",
+							"    let responseJson = pm.response.json(); // Parse the response JSON",
+							"",
+							"    // Check that the response contains all the required properties",
+							"    pm.expect(responseJson).to.have.property(\"postId\");",
+							"    pm.expect(responseJson).to.have.property(\"userId\");",
+							"    pm.expect(responseJson).to.have.property(\"content\");",
+							"    pm.expect(responseJson).to.have.property(\"createdAt\");",
+							"    pm.expect(responseJson).to.have.property(\"likeCount\");",
+							"    pm.expect(responseJson).to.have.property(\"user\");",
+							"    pm.expect(responseJson).to.have.property(\"comments\");",
+							"    pm.expect(responseJson).to.have.property(\"postLikes\");",
+							"",
+							"    // Validate the data types of each property",
+							"    pm.expect(responseJson.postId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.userId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.content).to.be.a(\"string\");",
+							"    pm.expect(responseJson.createdAt).to.be.a(\"string\"); // ISO datetime string",
+							"    pm.expect(responseJson.likeCount).to.be.a(\"number\");",
+							"    pm.expect(responseJson.user).to.be.null; // Ensure 'user' is null",
+							"    pm.expect(responseJson.comments).to.be.null; // Ensure 'comments' is null",
+							"    pm.expect(responseJson.postLikes).to.be.null; // Ensure 'postLikes' is null",
+							"});",
+							"",
+							"// Optional: Validate CreatedAt is a valid ISO 8601 datetime",
+							"pm.test(\"CreatedAt is a valid ISO 8601 datetime\", function () {",
+							"    let createdAt = pm.response.json().createdAt;",
+							"    let isoRegex = /\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z/; // ISO 8601 with microseconds",
+							"    pm.expect(createdAt).to.match(isoRegex);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"if (pm.environment.get(\"jwt_token\")) {",
+							"    pm.request.headers.add({",
+							"        key: \"Authorization\",",
+							"        value: \"Bearer \" + pm.environment.get(\"jwt_token\")",
+							"    });",
+							"} else {",
+							"    console.warn(\"JWT token is not set in the environment.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": 1,\n  \"content\": \"hedfgdfj\",\n  \"likeCount\": 0\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}Post",
+					"host": [
+						"{{BASE_URL}}Post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Comment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test that the response status code is 201 (Created)",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"// Test that the Content-Type header is application/json",
+							"pm.test(\"Content-Type is application/json\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\", /application\\/json/);",
+							"});",
+							"",
+							"// Parse the response JSON",
+							"let responseJson = pm.response.json();",
+							"",
+							"// Test that the response contains all required properties",
+							"pm.test(\"Response contains all required properties\", function () {",
+							"    pm.expect(responseJson).to.have.property(\"commentId\");",
+							"    pm.expect(responseJson).to.have.property(\"userId\");",
+							"    pm.expect(responseJson).to.have.property(\"postId\");",
+							"    pm.expect(responseJson).to.have.property(\"content\");",
+							"    pm.expect(responseJson).to.have.property(\"createdAt\");",
+							"    pm.expect(responseJson).to.have.property(\"likeCount\");",
+							"    pm.expect(responseJson).to.have.property(\"commentLikes\");",
+							"});",
+							"",
+							"// Test that the property types are correct",
+							"pm.test(\"Response properties have correct types\", function () {",
+							"    pm.expect(responseJson.commentId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.userId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.postId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.content).to.be.a(\"string\");",
+							"    pm.expect(responseJson.createdAt).to.be.a(\"string\"); // ISO datetime string",
+							"    pm.expect(responseJson.likeCount).to.be.a(\"number\");",
+							"    pm.expect(responseJson.commentLikes).to.be.null; // Ensure 'commentLikes' is null",
+							"});",
+							"",
+							"// Optional: Validate the content of specific fields",
+							"pm.test(\"Response content matches expected values\", function () {",
+							"    let requestBody = pm.request.body ? JSON.parse(pm.request.body.raw) : {};",
+							"    pm.expect(responseJson.userId).to.eql(requestBody.userId);",
+							"    pm.expect(responseJson.postId).to.eql(requestBody.postId);",
+							"    pm.expect(responseJson.content).to.eql(requestBody.content);",
+							"    pm.expect(responseJson.likeCount).to.eql(requestBody.likeCount || 0); // Default to 0 if not set",
+							"});",
+							"",
+							"// Optional: Validate createdAt is a valid ISO 8601 datetime",
+							"pm.test(\"CreatedAt is a valid ISO 8601 datetime\", function () {",
+							"    let isoRegex = /\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z/; // Matches ISO 8601 with microseconds",
+							"    pm.expect(responseJson.createdAt).to.match(isoRegex);",
+							"});",
+							"",
+							"// Optional: Test response time",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "thisisaverysecureandlongkey12345",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"UserId\": 1,\n    \"content\": \"Hej med digasdfasdf!\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}1/Comment/",
+					"host": [
+						"{{BASE_URL}}1"
+					],
+					"path": [
+						"Comment",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Posts",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test for status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test for response time",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"pm.test(\"Response body has specific properties\", function () {",
+							"    let responseJson = pm.response.json(); // Parse the response JSON",
+							"    pm.expect(responseJson).to.be.an(\"array\"); // Ensure response is an array",
+							"",
+							"    responseJson.forEach((post) => {",
+							"        // Check top-level properties of each post",
+							"        pm.expect(post).to.have.property(\"postId\");",
+							"        pm.expect(post).to.have.property(\"userId\");",
+							"        pm.expect(post).to.have.property(\"content\");",
+							"        pm.expect(post).to.have.property(\"createdAt\");",
+							"        pm.expect(post).to.have.property(\"likeCount\");",
+							"        pm.expect(post).to.have.property(\"comments\");",
+							"        ",
+							"        // Validate the first comment if it exists",
+							"        if (post.comments.length > 0) {",
+							"            let comment = post.comments[0];",
+							"            pm.expect(comment).to.have.property(\"commentId\");",
+							"            pm.expect(comment).to.have.property(\"userId\");",
+							"            pm.expect(comment).to.have.property(\"postId\");",
+							"            pm.expect(comment).to.have.property(\"content\");",
+							"            pm.expect(comment).to.have.property(\"createdAt\");",
+							"            pm.expect(comment).to.have.property(\"likeCount\");",
+							"            pm.expect(comment).to.have.property(\"commentLikes\");",
+							"",
+							"            // Validate the first commentLike if it exists",
+							"            if (comment.commentLikes.length > 0) {",
+							"                let commentLike = comment.commentLikes[0];",
+							"                pm.expect(commentLike).to.have.property(\"commentLikeId\");",
+							"                pm.expect(commentLike).to.have.property(\"userId\");",
+							"                pm.expect(commentLike).to.have.property(\"commentId\");",
+							"            }",
+							"        }",
+							"    });",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}Post/",
+					"host": [
+						"{{BASE_URL}}Post"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Post by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test for status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test for response time",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response body has specific properties\", function () {",
+							"    let responseJson = pm.response.json(); // Parse the response JSON",
+							"",
+							"    // Check that the top-level properties exist",
+							"    pm.expect(responseJson).to.have.property(\"postId\");",
+							"    pm.expect(responseJson).to.have.property(\"userId\");",
+							"    pm.expect(responseJson).to.have.property(\"content\");",
+							"    pm.expect(responseJson).to.have.property(\"createdAt\");",
+							"    pm.expect(responseJson).to.have.property(\"likeCount\");",
+							"    pm.expect(responseJson).to.have.property(\"user\");",
+							"    pm.expect(responseJson).to.have.property(\"comments\");",
+							"    pm.expect(responseJson).to.have.property(\"postLikes\");",
+							"",
+							"    // Validate the data types of the properties",
+							"    pm.expect(responseJson.postId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.userId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.content).to.be.a(\"string\");",
+							"    pm.expect(responseJson.createdAt).to.be.a(\"string\"); // ISO date string",
+							"    pm.expect(responseJson.likeCount).to.be.a(\"number\");",
+							"    pm.expect(responseJson.user).to.be.null; // Ensure 'user' is null",
+							"    pm.expect(responseJson.comments).to.be.null; // Ensure 'comments' is null",
+							"    pm.expect(responseJson.postLikes).to.be.null; // Ensure 'postLikes' is null",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}Post/1",
+					"host": [
+						"{{BASE_URL}}Post"
+					],
+					"path": [
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Comment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test that the response status code is 200 (OK)",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test that the Content-Type header is application/json",
+							"pm.test(\"Content-Type is application/json\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\", /application\\/json/);",
+							"});",
+							"",
+							"// Parse the response JSON",
+							"let responseJson = pm.response.json();",
+							"",
+							"// Test that the response contains all required properties",
+							"pm.test(\"Response contains all required properties\", function () {",
+							"    pm.expect(responseJson).to.have.property(\"commentId\");",
+							"    pm.expect(responseJson).to.have.property(\"userId\");",
+							"    pm.expect(responseJson).to.have.property(\"postId\");",
+							"    pm.expect(responseJson).to.have.property(\"content\");",
+							"    pm.expect(responseJson).to.have.property(\"createdAt\");",
+							"    pm.expect(responseJson).to.have.property(\"likeCount\");",
+							"    pm.expect(responseJson).to.have.property(\"user\");",
+							"    pm.expect(responseJson).to.have.property(\"post\");",
+							"    pm.expect(responseJson).to.have.property(\"commentLikes\");",
+							"});",
+							"",
+							"// Test that the property types are correct",
+							"pm.test(\"Response properties have correct types\", function () {",
+							"    pm.expect(responseJson.commentId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.userId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.postId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.content).to.be.a(\"string\");",
+							"    pm.expect(responseJson.createdAt).to.be.a(\"string\"); // ISO date string",
+							"    pm.expect(responseJson.likeCount).to.be.a(\"number\");",
+							"    pm.expect(responseJson.user).to.be.null; // Ensure 'user' is null",
+							"    pm.expect(responseJson.post).to.be.null; // Ensure 'post' is null",
+							"    pm.expect(responseJson.commentLikes).to.be.null; // Ensure 'commentLikes' is null",
+							"});",
+							"",
+							"// Optional: Validate the content of specific fields",
+							"pm.test(\"Response content matches expected values\", function () {",
+							"    pm.expect(responseJson.commentId).to.eql(2);",
+							"    pm.expect(responseJson.userId).to.eql(3);",
+							"    pm.expect(responseJson.postId).to.eql(2);",
+							"    pm.expect(responseJson.content).to.eql(\"What book did you read?\");",
+							"    pm.expect(responseJson.likeCount).to.eql(1);",
+							"});",
+							"",
+							"// Optional: Validate createdAt is a valid ISO 8601 date",
+							"pm.test(\"CreatedAt is a valid ISO 8601 datetime\", function () {",
+							"    let isoRegex = /\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}/; // Matches YYYY-MM-DDTHH:MM:SS format",
+							"    pm.expect(responseJson.createdAt).to.match(isoRegex);",
+							"});",
+							"",
+							"// Optional: Test response time",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}1/Comment/1",
+					"host": [
+						"{{BASE_URL}}1"
+					],
+					"path": [
+						"Comment",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Commments",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test that the response status code is 200 (OK)",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"// Parse the response JSON",
+							"let responseJson = pm.response.json();",
+							"",
+							"// Test that the response is an array",
+							"pm.test(\"Response is an array\", function () {",
+							"    pm.expect(responseJson).to.be.an(\"array\");",
+							"});",
+							"",
+							"// Validate each comment object in the array",
+							"responseJson.forEach((comment, index) => {",
+							"    pm.test(`Comment object at index ${index} contains all required properties`, function () {",
+							"        pm.expect(comment).to.have.property(\"commentId\");",
+							"        pm.expect(comment).to.have.property(\"userId\");",
+							"        pm.expect(comment).to.have.property(\"postId\");",
+							"        pm.expect(comment).to.have.property(\"content\");",
+							"        pm.expect(comment).to.have.property(\"createdAt\");",
+							"        pm.expect(comment).to.have.property(\"likeCount\");",
+							"        pm.expect(comment).to.have.property(\"commentLikes\");",
+							"    });",
+							"",
+							"    pm.test(`Comment object at index ${index} has correct data types`, function () {",
+							"        pm.expect(comment.commentId).to.be.a(\"number\");",
+							"        pm.expect(comment.userId).to.be.a(\"number\");",
+							"        pm.expect(comment.postId).to.be.a(\"number\");",
+							"        pm.expect(comment.content).to.be.a(\"string\");",
+							"        pm.expect(comment.createdAt).to.be.a(\"string\"); // ISO date string",
+							"        pm.expect(comment.likeCount).to.be.a(\"number\");",
+							"        pm.expect(comment.commentLikes).to.be.an(\"array\");",
+							"    });",
+							"",
+							"    // Validate each commentLike object in commentLikes array",
+							"    if (comment.commentLikes.length > 0) {",
+							"        comment.commentLikes.forEach((commentLike, likeIndex) => {",
+							"            pm.test(`CommentLike object at index ${likeIndex} for comment ${index} contains all required properties`, function () {",
+							"                pm.expect(commentLike).to.have.property(\"commentLikeId\");",
+							"                pm.expect(commentLike).to.have.property(\"userId\");",
+							"                pm.expect(commentLike).to.have.property(\"commentId\");",
+							"            });",
+							"",
+							"            pm.test(`CommentLike object at index ${likeIndex} for comment ${index} has correct data types`, function () {",
+							"                pm.expect(commentLike.commentLikeId).to.be.a(\"number\");",
+							"                pm.expect(commentLike.userId).to.be.a(\"number\");",
+							"                pm.expect(commentLike.commentId).to.be.a(\"number\");",
+							"            });",
+							"        });",
+							"    }",
+							"});",
+							"",
+							"//Test response time",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiam9obkBleGFtcGxlLmNvbSIsImV4cCI6MTczMzMwNTMxMywiaXNzIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NTI2MC8iLCJhdWQiOiJrZWFzb2NpYWwifQ.HJvJYhkBQ2cjPo-zKiKRAbvRiHLRlgwqHznXcfkIxzY",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}1/Comment/",
+					"host": [
+						"{{BASE_URL}}1"
+					],
+					"path": [
+						"Comment",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Lectures",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response is an array of lectures\", function () {",
+							"    let responseJson = pm.response.json(); // Parse the response JSON",
+							"",
+							"    // Ensure response is an array",
+							"    pm.expect(responseJson).to.be.an(\"array\");",
+							"",
+							"    // Validate each lecture object in the array",
+							"    responseJson.forEach((lecture) => {",
+							"        // Check top-level properties",
+							"        pm.expect(lecture).to.have.property(\"lectureId\");",
+							"        pm.expect(lecture).to.have.property(\"lectureTitle\");",
+							"        pm.expect(lecture).to.have.property(\"lectureDescription\");",
+							"        pm.expect(lecture).to.have.property(\"lectureDate\");",
+							"        pm.expect(lecture).to.have.property(\"lectureTime\");",
+							"        pm.expect(lecture).to.have.property(\"calendars\");",
+							"",
+							"        // Validate the data types of properties",
+							"        pm.expect(lecture.lectureId).to.be.a(\"number\");",
+							"        pm.expect(lecture.lectureTitle).to.be.a(\"string\");",
+							"        pm.expect(lecture.lectureDescription).to.be.a(\"string\");",
+							"        pm.expect(lecture.lectureDate).to.be.a(\"string\"); // ISO date string",
+							"        pm.expect(lecture.lectureTime).to.be.a(\"string\"); // Time string",
+							"        pm.expect(lecture.calendars).to.be.null; // Ensure 'calendars' is null",
+							"    });",
+							"});",
+							"",
+							"pm.test(\"LectureTime is a valid time format\", function () {",
+							"    responseJson.forEach((lecture) => {",
+							"        let timeRegex = /^([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$/; // Matches HH:MM:SS format",
+							"        pm.expect(lecture.lectureTime).to.match(timeRegex);",
+							"    });",
+							"});",
+							"",
+							"pm.test(\"LectureDate is a valid ISO 8601 date\", function () {",
+							"    responseJson.forEach((lecture) => {",
+							"        let lectureDate = lecture.lectureDate;",
+							"        pm.expect(new Date(lectureDate).toISOString().split('T')[0]).to.eql(lectureDate.split('T')[0]);",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}Lecture",
+					"host": [
+						"{{BASE_URL}}Lecture"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Lecture",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"if (pm.environment.get(\"jwt_token\")) {",
+							"    pm.request.headers.add({",
+							"        key: \"Authorization\",",
+							"        value: \"Bearer \" + pm.environment.get(\"jwt_token\")",
+							"    });",
+							"} else {",
+							"    console.warn(\"JWT token is not set in the environment.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}Lecture",
+					"host": [
+						"{{BASE_URL}}Lecture"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Lecture by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response is a single lecture object\", function () {",
+							"    let responseJson = pm.response.json(); // Parse the response JSON",
+							"",
+							"    // Check that the response contains all the required properties",
+							"    pm.expect(responseJson).to.have.property(\"lectureId\");",
+							"    pm.expect(responseJson).to.have.property(\"lectureTitle\");",
+							"    pm.expect(responseJson).to.have.property(\"lectureDescription\");",
+							"    pm.expect(responseJson).to.have.property(\"lectureDate\");",
+							"    pm.expect(responseJson).to.have.property(\"lectureTime\");",
+							"    pm.expect(responseJson).to.have.property(\"calendars\");",
+							"",
+							"    // Validate the data types of each property",
+							"    pm.expect(responseJson.lectureId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.lectureTitle).to.be.a(\"string\");",
+							"    pm.expect(responseJson.lectureDescription).to.be.a(\"string\");",
+							"    pm.expect(responseJson.lectureDate).to.be.a(\"string\"); // ISO date string",
+							"    pm.expect(responseJson.lectureTime).to.be.a(\"string\"); // Time string",
+							"    pm.expect(responseJson.calendars).to.be.null; // Ensure 'calendars' is null",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"packages": {},
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}Lecture/1",
+					"host": [
+						"{{BASE_URL}}Lecture"
+					],
+					"path": [
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Lecture",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}lecture",
+					"host": [
+						"{{BASE_URL}}lecture"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Lecture",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}Lecture/",
+					"host": [
+						"{{BASE_URL}}Lecture"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Post",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test that the status code is 200 (OK) or 500 (unauthorized)",
+							"pm.test(\"Status code is 200 or 500\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 500]);",
+							"});",
+							"",
+							"// Test that the response body contains the updated post object",
+							"pm.test(\"Response contains the updated post object\", function () {",
+							"    let responseJson = pm.response.json();",
+							"",
+							"    // Check that all required properties exist",
+							"    pm.expect(responseJson).to.have.property(\"postId\");",
+							"    pm.expect(responseJson).to.have.property(\"userId\");",
+							"    pm.expect(responseJson).to.have.property(\"content\");",
+							"    pm.expect(responseJson).to.have.property(\"likeCount\");",
+							"    pm.expect(responseJson).to.have.property(\"createdAt\");",
+							"    pm.expect(responseJson).to.have.property(\"user\");",
+							"    pm.expect(responseJson).to.have.property(\"comments\");",
+							"    pm.expect(responseJson).to.have.property(\"postLikes\");",
+							"",
+							"    // Validate that the response values match the request body",
+							"    let requestBody = pm.request.body ? JSON.parse(pm.request.body.raw) : {};",
+							"    pm.expect(responseJson.userId).to.eql(requestBody.userId);",
+							"    pm.expect(responseJson.content).to.eql(requestBody.content);",
+							"    pm.expect(responseJson.likeCount).to.eql(requestBody.likeCount);",
+							"",
+							"    // Optional: Check that user, comments, and postLikes are still null",
+							"    pm.expect(responseJson.user).to.be.null;",
+							"    pm.expect(responseJson.comments).to.be.null;",
+							"    pm.expect(responseJson.postLikes).to.be.null;",
+							"});",
+							"",
+							"// Test response time",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": 1,\n  \"content\": \"hedfgdfsdfsdfsdfasdasdaasdafsdfsdsj\",\n  \"likeCount\": 0\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}Post/1",
+					"host": [
+						"{{BASE_URL}}Post"
+					],
+					"path": [
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Comment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test that the response status code is 200 (OK)",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test that the Content-Type header is application/json",
+							"pm.test(\"Content-Type is application/json\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\", /application\\/json/);",
+							"});",
+							"",
+							"// Parse the response JSON",
+							"let responseJson = pm.response.json();",
+							"",
+							"// Test that the response contains all required properties",
+							"pm.test(\"Response contains all required properties\", function () {",
+							"    pm.expect(responseJson).to.have.property(\"commentId\");",
+							"    pm.expect(responseJson).to.have.property(\"userId\");",
+							"    pm.expect(responseJson).to.have.property(\"postId\");",
+							"    pm.expect(responseJson).to.have.property(\"content\");",
+							"    pm.expect(responseJson).to.have.property(\"createdAt\");",
+							"    pm.expect(responseJson).to.have.property(\"likeCount\");",
+							"    pm.expect(responseJson).to.have.property(\"commentLikes\");",
+							"});",
+							"",
+							"// Test that the property types are correct",
+							"pm.test(\"Response properties have correct types\", function () {",
+							"    pm.expect(responseJson.commentId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.userId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.postId).to.be.a(\"number\");",
+							"    pm.expect(responseJson.content).to.be.a(\"string\");",
+							"    pm.expect(responseJson.createdAt).to.be.a(\"string\"); // ISO datetime string",
+							"    pm.expect(responseJson.likeCount).to.be.a(\"number\");",
+							"    pm.expect(responseJson.commentLikes).to.be.an(\"array\");",
+							"});",
+							"",
+							"// Validate the updated values match the request body",
+							"pm.test(\"Updated fields match request body\", function () {",
+							"    let requestBody = pm.request.body ? JSON.parse(pm.request.body.raw) : {};",
+							"    pm.expect(responseJson.content).to.eql(requestBody.content);",
+							"    pm.expect(responseJson.likeCount).to.eql(requestBody.likeCount);",
+							"});",
+							"",
+							"// Validate each commentLike object in the commentLikes array",
+							"if (responseJson.commentLikes.length > 0) {",
+							"    responseJson.commentLikes.forEach((commentLike, index) => {",
+							"        pm.test(`CommentLike object at index ${index} contains all required properties`, function () {",
+							"            pm.expect(commentLike).to.have.property(\"commentLikeId\");",
+							"            pm.expect(commentLike).to.have.property(\"userId\");",
+							"            pm.expect(commentLike).to.have.property(\"commentId\");",
+							"        });",
+							"",
+							"        pm.test(`CommentLike object at index ${index} has correct data types`, function () {",
+							"            pm.expect(commentLike.commentLikeId).to.be.a(\"number\");",
+							"            pm.expect(commentLike.userId).to.be.a(\"number\");",
+							"            pm.expect(commentLike.commentId).to.be.a(\"number\");",
+							"        });",
+							"    });",
+							"}",
+							"",
+							"// Optional: Validate createdAt is a valid ISO 8601 datetime",
+							"pm.test(\"createdAt is a valid ISO 8601 datetime\", function () {",
+							"    let isoRegex = /\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}/; // Matches YYYY-MM-DDTHH:MM:SS format",
+							"    pm.expect(responseJson.createdAt).to.match(isoRegex);",
+							"});",
+							"",
+							"// Optional: Test response time",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": 1,\n  \"content\": \"hedfgdfsdfsdfsdfasdasdaasdafsdfsdsj\",\n  \"likeCount\": 0\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}1/Comment/1",
+					"host": [
+						"{{BASE_URL}}1"
+					],
+					"path": [
+						"Comment",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Comment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test that the status code is 204 (No Content) or 200 (OK)",
+							"pm.test(\"Status code is 204 or 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([204, 200]);",
+							"});",
+							"",
+							"// Test that the Content-Type header is application/json (if applicable)",
+							"pm.test(\"Content-Type is application/json if response body exists\", function () {",
+							"    if (pm.response.code === 200) {",
+							"        pm.response.to.have.header(\"Content-Type\", /application\\/json/);",
+							"    }",
+							"});",
+							"",
+							"// Test that the response body is empty (for 204 No Content)",
+							"pm.test(\"Response body is empty for 204\", function () {",
+							"    if (pm.response.code === 204) {",
+							"        pm.expect(pm.response.text()).to.eql(\"\"); // Ensure response body is empty",
+							"    }",
+							"});",
+							"",
+							"// Optional: Test for a success message in the response body (for 200 OK)",
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Response contains success message\", function () {",
+							"        let responseJson = pm.response.json();",
+							"        pm.expect(responseJson).to.have.property(\"message\");",
+							"        pm.expect(responseJson.message).to.match(/deleted successfully/i); // Ensure a success message",
+							"    });",
+							"}",
+							"",
+							"// Test response time",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}1/Comment/1",
+					"host": [
+						"{{BASE_URL}}1"
+					],
+					"path": [
+						"Comment",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test that the status code is 204 (No Content) or 200 (OK)",
+							"pm.test(\"Status code is 204 or 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([204, 200]);",
+							"});",
+							"",
+							"// Test that the Content-Type header is application/json (if applicable)",
+							"pm.test(\"Content-Type is application/json if response body exists\", function () {",
+							"    if (pm.response.code === 200) {",
+							"        pm.response.to.have.header(\"Content-Type\", /application\\/json/);",
+							"    }",
+							"});",
+							"",
+							"// Test that the response body is empty (for 204 No Content)",
+							"pm.test(\"Response body is empty for 204\", function () {",
+							"    if (pm.response.code === 204) {",
+							"        pm.expect(pm.response.text()).to.eql(\"\"); // Ensure response body is empty",
+							"    }",
+							"});",
+							"",
+							"// Optional: Test for a success message in the response body (for 200 OK)",
+							"if (pm.response.code === 200) {",
+							"    pm.test(\"Response contains success message\", function () {",
+							"        let responseJson = pm.response.json();",
+							"        pm.expect(responseJson).to.have.property(\"message\");",
+							"        pm.expect(responseJson.message).to.match(/deleted successfully/i); // Ensure a success message",
+							"    });",
+							"}",
+							"",
+							"// Test response time",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}Post/1",
+					"host": [
+						"{{BASE_URL}}Post"
+					],
+					"path": [
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"// Fetch the JWT token from the environment variable",
+					"let jwtToken = pm.environment.get(\"jwt_token\");",
+					"",
+					"if (!jwtToken) {",
+					"    console.error(\"JWT token is missing!\");",
+					"    postman.setNextRequest(null); // Stop the request if no token is available",
+					"} else {",
+					"    // Decode the JWT token to extract the payload",
+					"    let tokenParts = jwtToken.split('.');",
+					"    if (tokenParts.length !== 3) {",
+					"        console.error(\"Invalid JWT format.\");",
+					"        postman.setNextRequest(null); // Stop the request if the token format is invalid",
+					"    } else {",
+					"        let payload = JSON.parse(atob(tokenParts[1])); // Decode the base64 payload",
+					"",
+					"        // Extract the userId from the payload (assuming it's stored in a \"userId\" field)",
+					"        let userId = payload.userId;",
+					"",
+					"        if (!userId) {",
+					"            console.error(\"userId not found in token payload.\");",
+					"            postman.setNextRequest(null); // Stop the request if userId is missing",
+					"        } else {",
+					"            console.log(\"Extracted userId from token:\", userId);",
+					"",
+					"            // Store the userId in an environment variable for later use",
+					"            pm.environment.set(\"userId\", userId);",
+					"",
+					"            // Fetch the postId dynamically from an environment variable",
+					"            let postId = pm.environment.get(\"postId\");",
+					"",
+					"            if (!postId) {",
+					"                console.error(\"postId is missing!\");",
+					"                postman.setNextRequest(null); // Stop the request if postId is not set",
+					"            } else {",
+					"                // Validate permissions using a permissions endpoint",
+					"                pm.sendRequest({",
+					"                    url: `https://your-api.com/posts/${postId}/permissions`,",
+					"                    method: 'GET',",
+					"                    header: {",
+					"                        'Authorization': 'Bearer ' + jwtToken,",
+					"                        'Content-Type': 'application/json'",
+					"                    }",
+					"                }, function (err, response) {",
+					"                    if (err) {",
+					"                        console.error(\"Error in permission check:\", err);",
+					"                        postman.setNextRequest(null); // Stop the request if there is an error",
+					"                    } else {",
+					"                        let jsonData = response.json();",
+					"",
+					"                        // Example: Check for specific permissions in the response",
+					"                        if (!jsonData.canEdit && !jsonData.canDelete) {",
+					"                            console.warn(\"User is not authorized to update or delete this post.\");",
+					"                            postman.setNextRequest(null); // Stop the main request if user is not authorized",
+					"                        } else {",
+					"                            console.log(\"User is authorized to proceed.\");",
+					"                        }",
+					"                    }",
+					"                });",
+					"            }",
+					"        }",
+					"    }",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:5260/api/",
+			"type": "string"
+		}
+	]
+}
