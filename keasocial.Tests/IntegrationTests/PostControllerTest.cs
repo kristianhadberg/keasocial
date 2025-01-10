@@ -11,6 +11,8 @@ public class PostControllerTest : IntegrationTestSetup
     public async Task Get_WithoutAnyPosts_ReturnsEmptyList()
     {
         var response = await TestClient.GetAsync("api/Post");
+        Console.WriteLine(response.Content);
+        Console.WriteLine(response.StatusCode);
         var rawResponse = await response.Content.ReadAsStringAsync();
         Console.WriteLine($"Response Content: {rawResponse}");
         
