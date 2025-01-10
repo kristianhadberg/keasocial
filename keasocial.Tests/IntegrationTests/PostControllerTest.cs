@@ -2,24 +2,16 @@ using System.Net;
 using System.Net.Http.Json;
 using keasocial.Dto;
 using keasocial.Models;
-using Xunit.Abstractions;
 
 namespace keasocial.Tests.IntegrationTests;
 
 public class PostControllerTest : IntegrationTestSetup
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public PostControllerTest(ITestOutputHelper testOutputHelper)
-    {
-        _testOutputHelper = testOutputHelper;
-    }
-
     [Fact]
     public void LogEnvironment()
     {
         var currentEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-        _testOutputHelper.WriteLine($"Current Environment: {currentEnvironment ?? "Not Set"}");
+        Console.WriteLine($"Current Environment: {currentEnvironment ?? "Not Set"}");
     }
     
     /*[Fact]
