@@ -47,9 +47,9 @@ public class IntegrationTestSetup
         var appFactory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
             {
+                builder.UseSetting("ASPNETCORE_ENVIRONMENT", "Development"); // Or "Testing"
                 builder.ConfigureServices(services =>
                 {
-                    builder.UseSetting("ASPNETCORE_ENVIRONMENT", "Development"); // Or "Testing"
                     // Remove all existing DbContext registrations
                     var descriptor = services.SingleOrDefault(
                         d => d.ServiceType == typeof(DbContextOptions<KeasocialDbContext>));
