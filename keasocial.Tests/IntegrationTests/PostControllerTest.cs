@@ -11,7 +11,9 @@ public class PostControllerTest : IntegrationTestSetup
     public async Task Get_WithoutAnyPosts_ReturnsEmptyList()
     {
         var response = await TestClient.GetAsync("api/Post");
-
+        var rawResponse = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"Response Content: {rawResponse}");
+        
         /*var posts = await response.Content.ReadFromJsonAsync<List<PostDto>>();*/
         var posts = await response.Content.ReadAsAsync<List<Post>>();
 
@@ -32,6 +34,10 @@ public class PostControllerTest : IntegrationTestSetup
         await CreatePostAsync(newPost);
         
         var response = await TestClient.GetAsync("api/Post/1");
+        
+        var rawResponse = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"Response Content: {rawResponse}");
+        
         var returnedPost = await response.Content.ReadAsAsync<Post>();
         
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
