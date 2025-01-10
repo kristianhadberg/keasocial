@@ -51,7 +51,9 @@ public class IntegrationTestSetup
         var appFactory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
             {
-                builder.UseSetting("ASPNETCORE_ENVIRONMENT", "Testing"); // Or "Testing"
+                builder.UseSetting("ASPNETCORE_ENVIRONMENT", "Testing");
+                builder.UseSetting("http_port", "5000");
+                
                 builder.ConfigureServices(services =>
                 {
                     // Remove all existing DbContext registrations
@@ -75,7 +77,13 @@ public class IntegrationTestSetup
                 });
             });
         
-        TestClient = appFactory.CreateClient();
+        /*TestClient = appFactory.CreateClient();*/
+        TestClient = appFactory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            BaseAddress = new Uri("http://localhost:5000/")
+        });
+        
+        Console.WriteLine($"baseadress: {TestClient.BaseAddress}");
     }
     
     protected async Task<Post> CreatePostAsync(PostCreateDto postCreateDto)
