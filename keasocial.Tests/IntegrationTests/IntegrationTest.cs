@@ -48,7 +48,7 @@ public class IntegrationTestSetup
         
         var TestDatabaseName = $"TestDb_{Guid.NewGuid()}";
 
-        /*var appFactory = new WebApplicationFactory<Program>()
+        var appFactory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
             {
                 builder.UseSetting("ASPNETCORE_ENVIRONMENT", "Testing"); // Or "Testing"
@@ -72,51 +72,6 @@ public class IntegrationTestSetup
                     var context = scope.ServiceProvider.GetRequiredService<KeasocialDbContext>();
                     context.Database.EnsureCreated();
                     Console.WriteLine("Database schema created successfully");
-                });
-            });*/
-        var appFactory = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
-            {
-                builder.UseSetting("ASPNETCORE_ENVIRONMENT", "Testing");
-                builder.ConfigureServices(services =>
-                {
-                    // Remove DbContext registration and use the in-memory database
-                    var descriptor = services.SingleOrDefault(
-                        d => d.ServiceType == typeof(DbContextOptions<KeasocialDbContext>));
-                    if (descriptor != null)
-                    {
-                        services.Remove(descriptor);
-                    }
-
-                    services.AddDbContext<KeasocialDbContext>(options =>
-                        options.UseInMemoryDatabase(TestDatabaseName));
-
-
-                    services.RemoveAll<IPostService>();
-                    services.RemoveAll<IUserService>();
-                    services.RemoveAll<ICommentService>();
-                    services.RemoveAll<LectureService>();
-                    
-                    
-                    services.AddControllers();
-                    services.AddScoped<IUserService, UserService>();
-                    services.AddScoped<ILectureService, LectureService>();
-                    services.AddScoped<IPostService, PostService>();
-                    services.AddScoped<ICommentService, CommentService>();
-
-                    services.AddScoped<IUserRepository, UserRepository>();
-                    services.AddScoped<ILectureRepository, LectureRepository>();
-                    services.AddScoped<IPostRepository, PostRepository>();
-                    services.AddScoped<ICommentRepository, CommentRepository>();
-
-                    // Build the service provider to apply changes
-                    var serviceProvider = services.BuildServiceProvider();
-
-                    // Validate the database and seed data if necessary
-                    using var scope = serviceProvider.CreateScope();
-                    var context = scope.ServiceProvider.GetRequiredService<KeasocialDbContext>();
-                    context.Database.EnsureCreated();
-
                 });
             });
         
