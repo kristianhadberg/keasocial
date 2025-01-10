@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: ["master"]
 
+  workflow_dispatch: 
+
 jobs:
   api-tests:
     runs-on: ubuntu-latest
@@ -42,8 +44,8 @@ jobs:
       # Step 5: Run Postman Collection with Newman
       - name: Run API Tests
         run: |
-          newman run Updated_Keasocial.postman_collection.json \
-          --environment PostmanEnvironment.json \
+          newman run Keasocial.postman_collection.json \
+          --environment keasocial.postman_environment.json \
           --reporters cli,junit \
           --reporter-junit-export TestResults/newman-api-tests.xml
 
