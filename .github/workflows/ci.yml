@@ -33,7 +33,7 @@ jobs:
 
             # Step 7: Run tests with code coverage
             - name: Test with Coverage
-              run: dotnet test --collect:"XPlat Code Coverage" --verbosity normal --results-directory TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+              run: dotnet test --no-build --collect:"XPlat Code Coverage" --verbosity normal --results-directory TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
             # Step 9: Upload Code Coverage Report
             - name: Upload Coverage Report
