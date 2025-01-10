@@ -1,0 +1,56 @@
+name: API Tests
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js for Newman
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Step 3: Install Newman
+      - name: Install Newman
+        run: npm install -g newman
+
+      # Step 4: Create Postman Environment File
+      - name: Create Postman Environment File
+        run: |
+          echo '{
+            "id": "dynamic-environment-id",
+            "name": "Postman Environment",
+            "values": [
+              { "key": "BASE_URL", "value": "${{ secrets.BASE_URL }}", "enabled": true },
+              { "key": "jwt_token", "value": "", "enabled": true },
+              { "key": "postId", "value": "", "enabled": true },
+              { "key": "commentId", "value": "", "enabled": true }
+            ]
+          }' > PostmanEnvironment.json
+
+      # Step 5: Run Postman Collection with Newman
+      - name: Run API Tests
+        run: |
+          newman run Updated_Keasocial.postman_collection.json \
+          --environment PostmanEnvironment.json \
+          --reporters cli,junit \
+          --reporter-junit-export TestResults/newman-api-tests.xml
+
+      # Step 6: Upload API Test Results
+      - name: Upload API Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-test-results
+          path: TestResults/newman-api-tests.xml
