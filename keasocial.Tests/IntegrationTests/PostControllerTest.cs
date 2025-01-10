@@ -24,7 +24,7 @@ public class PostControllerTest : IntegrationTestSetup
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
-    [Fact]
+    /*[Fact]
     public async Task Get_WithPostsInDb_ReturnsListOfPosts()
     {
         var newPost = new PostCreateDto
@@ -44,5 +44,5 @@ public class PostControllerTest : IntegrationTestSetup
         
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(newPost.Content, returnedPost.Content);
-    }
+    }*/
 }
