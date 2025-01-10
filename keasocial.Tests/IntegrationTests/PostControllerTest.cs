@@ -7,7 +7,7 @@ namespace keasocial.Tests.IntegrationTests;
 
 public class PostControllerTest : IntegrationTestSetup
 {
-    [Fact]
+    /*[Fact]
     public async Task Get_WithoutAnyPosts_ReturnsEmptyList()
     {
         var response = await TestClient.GetAsync("api/Post");
@@ -16,15 +16,15 @@ public class PostControllerTest : IntegrationTestSetup
         var rawResponse = await response.Content.ReadAsStringAsync();
         Console.WriteLine($"Response Content: {rawResponse}");
         
-        /*var posts = await response.Content.ReadFromJsonAsync<List<PostDto>>();*/
+        /*var posts = await response.Content.ReadFromJsonAsync<List<PostDto>>();#1#
         var posts = await response.Content.ReadAsAsync<List<PostDto>>();
 
         Assert.NotNull(response);
         Assert.Empty(posts);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    }
+    }*/
 
-    /*[Fact]
+    [Fact]
     public async Task Get_WithPostsInDb_ReturnsListOfPosts()
     {
         var newPost = new PostCreateDto
@@ -37,6 +37,8 @@ public class PostControllerTest : IntegrationTestSetup
         
         var response = await TestClient.GetAsync("api/Post/1");
         
+        Console.WriteLine($"response: ${response.StatusCode}");
+        
         var rawResponse = await response.Content.ReadAsStringAsync();
         Console.WriteLine($"Response Content: {rawResponse}");
         
@@ -44,5 +46,5 @@ public class PostControllerTest : IntegrationTestSetup
         
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(newPost.Content, returnedPost.Content);
-    }*/
+    }
 }
