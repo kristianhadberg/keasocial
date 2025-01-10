@@ -5,7 +5,6 @@ on:
     branches: ["master"]
   pull_request:
     branches: ["master"]
-
   workflow_dispatch: 
 
 jobs:
@@ -17,17 +16,38 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js for Newman
+      # Step 2: Set up .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      # Step 3: Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # Step 4: Build the project
+      - name: Build
+        run: dotnet build --no-restore
+
+      # Step 5: Run the API server in the background
+      - name: Run API Server
+        run: |
+          dotnet run --project keasocial/keasocial.csproj --urls http://localhost:5260 &
+        env:
+          ASPNETCORE_URLS: http://localhost:5260
+          continue-on-error: true 
+      # Step 6: Set up Node.js for Newman
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
 
-      # Step 3: Install Newman
+      # Step 7: Install Newman
       - name: Install Newman
         run: npm install -g newman
 
-      # Step 4: Run Postman Collection with Newman
+      # Step 8: Run Postman Collection with Newman
       - name: Run API Tests
         run: |
           newman run keasocial.Tests/postman/Keasocial.postman_collection.json \
@@ -35,7 +55,7 @@ jobs:
           --reporters cli,junit \
           --reporter-junit-export TestResults/newman-api-tests.xml
 
-      # Step 5: Upload API Test Results
+      # Step 9: Upload API Test Results
       - name: Upload API Test Results
         if: always()
         uses: actions/upload-artifact@v3
