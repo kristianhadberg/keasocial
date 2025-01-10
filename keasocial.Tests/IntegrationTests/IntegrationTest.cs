@@ -67,6 +67,7 @@ public class IntegrationTestSetup
                     using var scope = serviceProvider.CreateScope();
                     var context = scope.ServiceProvider.GetRequiredService<KeasocialDbContext>();
                     context.Database.EnsureCreated();
+                    Console.WriteLine("Database schema created successfully");
                 });
             });
         
