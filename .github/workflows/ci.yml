@@ -2,9 +2,9 @@ name: Continuous Integration KeaSocial
 
 on:
     push:
-        branches: ["master"]
+        branches: ["integration_test_ci"]
     pull_request:
-        branches: ["master"]
+        branches: ["integration_test_ci"]
 
 jobs:
     build:

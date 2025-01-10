@@ -49,6 +49,7 @@ public class IntegrationTestSetup
             {
                 builder.ConfigureServices(services =>
                 {
+                    builder.UseSetting("ASPNETCORE_ENVIRONMENT", "Development"); // Or "Testing"
                     // Remove all existing DbContext registrations
                     var descriptor = services.SingleOrDefault(
                         d => d.ServiceType == typeof(DbContextOptions<KeasocialDbContext>));
