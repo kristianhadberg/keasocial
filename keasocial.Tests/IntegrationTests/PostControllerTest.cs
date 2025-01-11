@@ -5,6 +5,7 @@ using keasocial.Models;
 
 namespace keasocial.Tests.IntegrationTests;
 
+[Trait("Category", "Integration")]
 public class PostControllerTest : IntegrationTestSetup
 {
     [Fact]
