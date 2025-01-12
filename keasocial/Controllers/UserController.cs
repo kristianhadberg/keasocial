@@ -23,8 +23,8 @@ public class UserController : ControllerBase
         return Ok(users);
     }
     
-    [HttpGet("${userId}")]
-    public async Task<ActionResult<List<User>>> Get(int userId)
+    [HttpGet("{userId}")]
+    public async Task<ActionResult<User>> Get(int userId)
     {
         var user = await _userService.GetAsync(userId);
         return Ok(user);
