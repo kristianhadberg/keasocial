@@ -11,16 +11,34 @@ namespace keasocial.Tests.UnitTests;
 
 public class WeatherServiceTest
 {
+        private readonly Mock<IConfigurationSection> _mockConfigurationSection;
+        private readonly Mock<IConfiguration> _mockConfiguration;
+
+        private readonly Mock<HttpMessageHandler> _handlerMock;
+
+        public WeatherServiceTest()
+        {
+            _mockConfigurationSection = new Mock<IConfigurationSection>();
+            _mockConfigurationSection.Setup(x => x.Value).Returns("mock_api_key");
+
+            _mockConfiguration = new Mock<IConfiguration>();
+            _mockConfiguration.Setup(x => x.GetSection("ConnectionStrings:WeatherApiConnection")).Returns(_mockConfigurationSection.Object);
+
+            _handlerMock = new Mock<HttpMessageHandler>();
+            
+        
+        }
+
     [Fact]
     public async Task WeatherService_WeatherDto_ReturnsCorrectFormat()
     {
         // Arrange
-        var mockConfigurationSection = new Mock<IConfigurationSection>();
+       /* var mockConfigurationSection = new Mock<IConfigurationSection>();
         mockConfigurationSection.Setup(x => x.Value).Returns("mock_api_key");
 
         var mockConfiguration = new Mock<IConfiguration>();
         mockConfiguration.Setup(x => x.GetSection("ConnectionStrings:WeatherApiConnection")).Returns(mockConfigurationSection.Object);
-
+        */
         // mock api response
         var weatherApiResponse = new WeatherApi
         {
@@ -50,16 +68,16 @@ public class WeatherServiceTest
 
         var httpClient = new HttpClient(handlerMock.Object);
 
-        var weatherService = new WeatherService(httpClient, mockConfiguration.Object);
+        var weatherService = new WeatherService(httpClient, _mockConfiguration.Object);
 
         
         var result = await weatherService.GetWeatherAsync(); // Act
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Equal("Clear sky", result.description);
-        Assert.Equal(20.5, result.temp);
-        Assert.Equal(60, result.humidity);
-        Assert.Equal(5.2, result.speed);
+            Assert.NotNull(result);
+            Assert.Equal("Clear sky", result.description);
+            Assert.Equal(20.5, result.temp);
+            Assert.Equal(60, result.humidity);
+            Assert.Equal(5.2, result.speed);
     }
 }
