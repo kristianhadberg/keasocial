@@ -2,6 +2,7 @@ const baseUrl = 'http://localhost:5260/';
 initButtons();
 
 function initButtons() {
+    const createPostForm = document.querySelector("#create-post-form");
     const getPostForm = document.querySelector("#get-post-form");
     const getAllButton = document.querySelector("#get-all-posts");
     const clearButton = document.querySelector("#clear-posts");
@@ -29,8 +30,48 @@ function initButtons() {
     getWeatherButton.addEventListener("click", async () => {
         await fetchWeather();
     })
+    
+    createPostForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        //const userId = createPostForm.userId.valueAsNumber;
+        const content = createPostForm.content.value;
+
+        if (content === "") {
+            return;
+        }
+
+        await createPost(content);
+    });
 }
 
+async function createPost(content) {
+    const endpoint = "api/Post";
+
+    try {
+        const response = await fetch(baseUrl + endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ 
+                content,
+                userId: 1,
+                createdAt: new Date().toISOString(),
+                likeCount: 0
+             }),
+    });
+
+    if (response.ok) {
+        const newPost = await response.json();
+        alert("Post created successfully");
+        displayPost(newPost);
+    } else {
+        throw new Error("Failed to create post");
+    }
+} catch (error) {
+    handleError();
+    }
+}
 
 async function fetchOnePost(id) {
     const endpoint = `api/Post/${id}`

@@ -19,10 +19,16 @@
 
     <div id="input">
 
+        <form id="create-post-form">
+            <span>Enter a post to create it</span>
+            <input type="text" name="content" value="" />
+            <input type="submit" value="createPost"></input>
+        </form>
+
         <form id="get-post-form">
             <span>Enter a post id to fetch it</span>
             <input type="number" name="number" value="" />
-            <input type="submit" value="getPost"></input>
+            <input id="get-post-by-id" type="submit" value="getPost"></input>
         </form>
 
         <button id="get-all-posts" type="button">Get all posts</button>
