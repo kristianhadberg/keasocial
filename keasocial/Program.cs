@@ -34,6 +34,8 @@ public class Program
         builder.Services.AddScoped<ICommentRepository, CommentRepository>();
         builder.Services.AddSingleton<JwtService>();
 
+        builder.Services.AddHttpClient<IWeatherService, WeatherService>();
+
 // Enable EF Core logging
         var loggerFactory = LoggerFactory.Create(loggingBuilder =>
         {

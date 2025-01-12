@@ -4,7 +4,8 @@ initButtons();
 function initButtons() {
     const getPostForm = document.querySelector("#get-post-form");
     const getAllButton = document.querySelector("#get-all-posts");
-    const clearButton = document.querySelector("#clear-posts")
+    const clearButton = document.querySelector("#clear-posts");
+    const getWeatherButton = document.querySelector("#get-weather");
 
     getPostForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -23,6 +24,10 @@ function initButtons() {
     
     clearButton.addEventListener("click", () => {
         clearOutput()
+    })
+
+    getWeatherButton.addEventListener("click", async () => {
+        await fetchWeather();
     })
 }
 
@@ -108,4 +113,29 @@ function handleError() {
     setTimeout(() => {
         output.innerHTML = '';
     }, 2000);
+}
+
+
+async function fetchWeather() {
+    const endpoint = "api/Weather";
+    fetch(baseUrl + endpoint)
+        .then(response => {
+            if (!response.ok) {
+                handleError();
+            } else {
+                return response.json();
+            }
+        })
+        .then(displayWeather)
+        .catch(handleError);
+}
+
+function displayWeather(data) {
+    const weatherElem = document.querySelector("#weather");
+    weatherElem.innerHTML = `
+conditions: ${data.description} | 
+temperature: ${data.temp}°C | 
+humidity: ${data.humidity}% | wind speeds: 
+${data.speed}m/s</p>
+    `;
 }
