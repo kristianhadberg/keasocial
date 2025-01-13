@@ -27,7 +27,7 @@ public class PostService : IPostService
     
     public async Task<Post> CreateAsync(PostCreateDto postCreateDto)
     {
-        ValidatePostCreateDto(postCreateDto);
+        ValidatePostContent(postCreateDto.Content);
         
         var post = new Post
         {
@@ -43,7 +43,7 @@ public class PostService : IPostService
 
     public async Task<Post> UpdateAsync(int id, PostUpdateDto postUpdateDto, int userId)
     {
-        ValidatePostUpdateDto(postUpdateDto);
+        ValidatePostContent(postUpdateDto.Content);
         
         Post post = await _postRepository.GetAsync(id);
         
@@ -109,20 +109,13 @@ public class PostService : IPostService
         return await _postRepository.GetMostLikedPostsAsync();
     }
 
-    public void ValidatePostCreateDto(PostCreateDto postCreateDto)
+    public void ValidatePostContent(string content)
     {
-        
-        if (string.IsNullOrWhiteSpace(postCreateDto.Content) || postCreateDto.Content.Length < 5 || postCreateDto.Content.Length > 100)
+        if (string.IsNullOrWhiteSpace(content) || content.Length is < 5 or > 100)
         {
             throw new ArgumentException("Content must be between 5 and 100 characters long.");
+            
         }
     }
     
-    private void ValidatePostUpdateDto(PostUpdateDto postUpdateDto)
-    {
-        if (string.IsNullOrWhiteSpace(postUpdateDto.Content) || postUpdateDto.Content.Length < 5 || postUpdateDto.Content.Length > 100)
-        {
-            throw new ArgumentException("Content must be between 5 and 100 characters long.");
-        }
-    }
 }
