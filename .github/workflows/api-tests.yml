@@ -51,20 +51,16 @@ jobs:
         shell: bash
         run: echo "PATH=\$PATH:~/.dotnet/tools" >> $GITHUB_ENV
 
-      # Step 6: Install Required Tools (netcat, sleep)
-      - name: Install Utilities
-        run: sudo apt-get update && sudo apt-get install -y netcat
-
-      # Step 7: Wait for the Database
+      # Step 6: Wait for the Database
       - name: Wait for Database
         run: |
           for i in {1..30}; do
-            nc -zv localhost 3306 && break
+            echo > /dev/tcp/localhost/3306 && break
             echo "Waiting for database..."
             sleep 5
           done
 
-      # Step 8: Run database migrations
+      # Step 7: Run database migrations
       - name: Run Migrations
         run: dotnet ef database update
         env:
@@ -74,7 +70,7 @@ jobs:
           DATABASE_PASSWORD: testpassword
           DATABASE_NAME: keasocial
 
-      # Step 9: Run the API server in the background
+      # Step 8: Run the API server in the background
       - name: Run API Server
         run: |
           dotnet run --project keasocial/keasocial.csproj --urls http://localhost:5260 &
@@ -86,17 +82,17 @@ jobs:
           DATABASE_PASSWORD: testpassword
           DATABASE_NAME: keasocial
 
-      # Step 10: Set up Node.js for Newman
+      # Step 9: Set up Node.js for Newman
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
 
-      # Step 11: Install Newman
+      # Step 10: Install Newman
       - name: Install Newman
         run: npm install -g newman
 
-      # Step 12: Run Postman Collection with Newman
+      # Step 11: Run Postman Collection with Newman
       - name: Run API Tests
         run: |
           newman run keasocial.Tests/postman/Keasocial.postman_collection.json \
@@ -104,7 +100,7 @@ jobs:
           --reporters cli,junit \
           --reporter-junit-export TestResults/newman-api-tests.xml
 
-      # Step 13: Upload API Test Results
+      # Step 12: Upload API Test Results
       - name: Upload API Test Results
         if: always()
         uses: actions/upload-artifact@v3
