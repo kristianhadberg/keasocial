@@ -19,6 +19,7 @@ namespace keasocial.Tests.SeleniumTests
         }
 
         [Fact]
+        [Trait("Category", "Selenium")]
         public void Test()
         {
             try
