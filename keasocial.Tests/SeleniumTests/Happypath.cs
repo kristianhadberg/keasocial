@@ -103,6 +103,7 @@ namespace keasocial.Tests.SeleniumTests
             FetchIdInput.SendKeys("1");
             Thread.Sleep(1000);
             GetPostIdButton.Click();
+            Thread.Sleep(1000);
 
             // Assert that the correct post is created and displayed
             //var postHeader = _driver.FindElement(By.Id(""));
