@@ -22,10 +22,10 @@ jobs:
           --health-timeout=5s
           --health-retries=3
         env:
-          MYSQL_ROOT_PASSWORD: root
+          MYSQL_ROOT_PASSWORD: admin2024
           MYSQL_DATABASE: keasocial
-          MYSQL_USER: testuser
-          MYSQL_PASSWORD: testpassword
+          MYSQL_USER: root
+          MYSQL_PASSWORD: admin2024
 
     steps:
       # Step 1: Check out the code
@@ -65,9 +65,9 @@ jobs:
         run: dotnet ef database update --project keasocial/keasocial.csproj
         env:
           DATABASE_HOST: localhost
-          DATABASE_PORT: 3306
-          DATABASE_USER: testuser
-          DATABASE_PASSWORD: testpassword
+          DATABASE_PORT: 3307
+          DATABASE_USER: root
+          DATABASE_PASSWORD: admin2024
           DATABASE_NAME: keasocial
 
       # Step 8: Run the API server in the background
@@ -77,9 +77,9 @@ jobs:
         env:
           ASPNETCORE_URLS: http://localhost:5260
           DATABASE_HOST: localhost
-          DATABASE_PORT: 3306
-          DATABASE_USER: testuser
-          DATABASE_PASSWORD: testpassword
+          DATABASE_PORT: 3307
+          DATABASE_USER: root
+          DATABASE_PASSWORD: admin2024
           DATABASE_NAME: keasocial
 
       # Step 9: Set up Node.js for Newman
