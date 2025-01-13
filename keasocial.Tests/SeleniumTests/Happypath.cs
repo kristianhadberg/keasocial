@@ -7,8 +7,10 @@ using SeleniumExtras.WaitHelpers;
 
 namespace keasocial.Tests.SeleniumTests
 {
+    [Trait("Category", "Selenium")]
     public class Happypath
     {
+
         private readonly IWebDriver _driver;
         private readonly string _baseUrl;
 
