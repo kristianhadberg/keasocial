@@ -46,22 +46,23 @@ jobs:
       - name: Install dotnet-ef
         run: dotnet tool install --global dotnet-ef
 
-      # Step 5: Add dotnet tools to PATH
+      # Step 5: Add .NET Tools to PATH
       - name: Add .NET Tools to PATH
-        run: echo "::add-path::$(dotnet --tool-path)"
+        shell: bash
+        run: echo "PATH=\$PATH:~/.dotnet/tools" >> $GITHUB_ENV
 
       # Step 6: Wait for the Database
       - name: Wait for Database
         run: |
           for i in {1..30}; do
-            nc -zv localhost 3306 && break
+            echo > /dev/tcp/localhost/3306 && break
             echo "Waiting for database..."
             sleep 5
           done
 
       # Step 7: Run database migrations
       - name: Run Migrations
-        run: dotnet ef database update
+        run: dotnet ef database update --project keasocial/keasocial.csproj
         env:
           DATABASE_HOST: localhost
           DATABASE_PORT: 3306
