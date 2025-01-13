@@ -1235,15 +1235,15 @@
 					"script": {
 						"exec": [
 							"// Test that the status code is 204 (No Content) or 200 (OK)",
-							"pm.test(\"Status code is 204 or 200\", function () {",
-							"    pm.expect(pm.response.code).to.be.oneOf([204, 200]);",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);",
 							"});",
 							"",
 							"",
-							"// Test that the response body is empty (for 204 No Content)",
-							"pm.test(\"Response body is empty for 204\", function () {",
+							"// Test that the response body is not empty (for 204 No Content)",
+							"pm.test(\"Response body is not empty for 204\", function () {",
 							"    if (pm.response.code === 204) {",
-							"        pm.expect(pm.response.text()).to.eql(\"\"); // Ensure response body is empty",
+							"        pm.expect(pm.response.text()).to.not.eql(\"\"); // Ensure response body is not empty",
 							"    }",
 							"});",
 							"",
@@ -1260,6 +1260,15 @@
 			"request": {
 				"method": "DELETE",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
 					"raw": "{{BASE_URL}}Post/{{postId}}",
 					"host": [
@@ -1267,6 +1276,139 @@
 					],
 					"path": [
 						"{{postId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Post By ID(Negative)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test that the status code is 204 (No Content)",
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([204]);",
+							"});",
+							"",
+							"// Test that the response body is empty (for 204 No Content)",
+							"pm.test(\"Response body is empty for 204\", function () {",
+							"    if (pm.response.code === 204) {",
+							"        pm.expect(pm.response.text()).to.eql(\"\"); // Ensure response body is empty",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}Post/1222222",
+					"host": [
+						"{{BASE_URL}}Post"
+					],
+					"path": [
+						"1222222"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login(Negative)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Response contains error message\", function () {",
+							"    var jsonData = pm.response.json();",
+							"",
+							"    // Check for the \"error\" field",
+							"    pm.expect(jsonData).to.have.property(\"error\");",
+							"    pm.expect(jsonData.error).to.equal(\"Invalid username or password.\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"{{uniqueEmail}}\",\n    \"password\": \"gdfg\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}User/login",
+					"host": [
+						"{{BASE_URL}}User"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Post(Negative",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Response contains error message\", function () {",
+							"    var jsonData = pm.response.json();",
+							"",
+							"    // Check for the \"error\" field",
+							"    pm.expect(jsonData).to.have.property(\"error\");",
+							"    pm.expect(jsonData.error).to.equal(\"Post with id: 42342342 does not exist.\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"packages": {},
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}Post/42342342",
+					"host": [
+						"{{BASE_URL}}Post"
+					],
+					"path": [
+						"42342342"
 					]
 				}
 			},
