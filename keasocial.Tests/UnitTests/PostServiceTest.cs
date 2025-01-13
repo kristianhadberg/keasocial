@@ -35,7 +35,7 @@ public class PostServiceTest
             LikeCount = 0
         };
 
-        var exception = Record.Exception(() => _postService.ValidatePostCreateDto(postCreateDto));
+        var exception = Record.Exception(() => _postService.ValidatePostContent(postCreateDto.Content));
         
         Assert.Null(exception);
     }
@@ -55,7 +55,7 @@ public class PostServiceTest
             LikeCount = 0
         };
 
-        var exception = Record.Exception(() => _postService.ValidatePostCreateDto(postCreateDto));
+        var exception = Record.Exception(() => _postService.ValidatePostContent(postCreateDto.Content));
         
         Assert.IsType<ArgumentException>(exception);
     }
@@ -137,6 +137,50 @@ public class PostServiceTest
         
         Assert.Equal(postCreateDto.UserId, result.UserId);
         Assert.Equal(postCreateDto.Content, result.Content);
+    }
+    
+    [Fact]
+    public async Task UpdateAsync_PostDoesNotExist_ThrowsException()
+    {
+        // Arrange
+        int postId = 1;
+        int userId = 1;
+        var postUpdateDto = new PostUpdateDto { Content = "Updated content", LikeCount = 0 };
+        
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => _postService.UpdateAsync(postId, postUpdateDto, userId));
+        Assert.Equal($"Post with ID {postId} not found.", exception.Message);
+    }
+    
+    [Fact]
+    public async Task UpdateAsync_UnauthorizedUser_ThrowsUnauthorizedException()
+    {
+        var postId = 1;
+        var post = new Post { PostId = postId, UserId = 100, Content = "Valid Content" };
+        var postUpdateDto = new PostUpdateDto { Content = "Updated content", LikeCount = 0 };
+        _postRepositoryMock.Setup(repo => repo.GetAsync(postId)).ReturnsAsync(post);
+
+        var exception = await Record.ExceptionAsync(() => _postService.UpdateAsync(post.PostId, postUpdateDto, postId));
+        Assert.IsType<UnauthorizedAccessException>(exception);
+    }
+    
+    [Fact]
+    public async Task UpdateAsync_Valid_ReturnsPost()
+    {
+        int postId = 1;
+        int userId = 1;
+        var postUpdateDto = new PostUpdateDto { Content = "Updated content", LikeCount = 10 };
+        var existingPost = new Post { PostId = postId, UserId = userId, Content = "Original content" };
+        var updatedPost = new Post { PostId = postId, UserId = userId, Content = postUpdateDto.Content, LikeCount = postUpdateDto.LikeCount };
+
+        _postRepositoryMock.Setup(r => r.GetAsync(postId)).ReturnsAsync(existingPost);
+        _postRepositoryMock.Setup(r => r.UpdateAsync(postId, It.IsAny<Post>())).ReturnsAsync(updatedPost);
+
+        var result = await _postService.UpdateAsync(postId, postUpdateDto, userId);
+
+        Assert.Equal(postUpdateDto.Content, result.Content);
+        Assert.Equal(postUpdateDto.LikeCount, result.LikeCount);
+        _postRepositoryMock.Verify(r => r.UpdateAsync(postId, It.IsAny<Post>()), Times.Once);
     }
 
     [Fact]
