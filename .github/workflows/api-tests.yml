@@ -81,12 +81,20 @@ jobs:
               DATABASE_USER: testuser
               DATABASE_PASSWORD: testpassword
               DATABASE_NAME: keasocial
+
+          - name: Debug Runner Environment
+            run: |
+                which curl || echo "curl not installed"
+                which tar || echo "tar not installed"
+                which apt-get || echo "apt-get not available"
+                uname -a
+                cat /etc/os-release    
   
                 # Step 9: Set up Node.js for Newman
           - name: Setup Node.js
             uses: actions/setup-node@v3
             with:
-                node-version: '16'
+                node-version: '18'
     
           # Step 10: Install Newman
           - name: Install Newman
