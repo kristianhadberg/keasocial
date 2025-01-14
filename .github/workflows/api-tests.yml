@@ -82,16 +82,23 @@ jobs:
               DATABASE_PASSWORD: testpassword
               DATABASE_NAME: keasocial
   
-          - name: Run API Tests in Docker
-            uses: docker://node:16
+                # Step 9: Set up Node.js for Newman
+          - name: Setup Node.js
+            uses: actions/setup-node@v3
             with:
-              args: |
-                sh -c "
-                npm install -g newman &&
-                newman run keasocial.Tests/postman/Keasocial.postman_collection.json \
+                node-version: '16'
+    
+          # Step 10: Install Newman
+          - name: Install Newman
+            run: npm install -g newman
+    
+          # Step 11: Run Postman Collection with Newman
+          - name: Run API Tests
+            run: |
+                  newman run keasocial.Tests/postman/Keasocial.postman_collection.json \
                   --environment keasocial.Tests/postman/keasocial.postman_environment.json \
                   --reporters cli,junit \
-                  --reporter-junit-export TestResults/newman-api-tests.xml"
+                  --reporter-junit-export TestResults/newman-api-tests.xml
   
   
         # Step 12: Upload API Test Results
