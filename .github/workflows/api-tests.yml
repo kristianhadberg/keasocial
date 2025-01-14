@@ -82,6 +82,12 @@ jobs:
           DATABASE_PASSWORD: testpassword
           DATABASE_NAME: keasocial
 
+      # Step 9: Install necessary tools
+      - name: Install necessary tools
+        run: |
+          apt-get update
+          apt-get install -y curl bash
+      
       # Step 9: Set up Node.js for Newman
       - name: Install Node.js manually
         run: |
