@@ -83,7 +83,8 @@ jobs:
           DATABASE_NAME: keasocial
 
       - name: Install tar
-        run: sudo apt-get update && sudo apt-get install -y tar
+        run: |
+          apt-get update && apt-get install -y tar
 
       # Step 9: Set up Node.js for Newman
       - name: Setup Node.js
