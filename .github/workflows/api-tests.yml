@@ -82,9 +82,6 @@ jobs:
           DATABASE_PASSWORD: testpassword
           DATABASE_NAME: keasocial
 
-      - name: Verify tar is installed
-        run: tar --version
-
       # Step 9: Set up Node.js for Newman
       - name: Setup Node.js
         uses: actions/setup-node@v3
