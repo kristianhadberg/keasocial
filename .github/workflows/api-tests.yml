@@ -28,7 +28,12 @@ jobs:
               MYSQL_PASSWORD: testpassword
 
         steps:
+            
     
+          - name: Set up Node.js
+            uses: actions/setup-node@v3
+            with:
+                node-version: '18'
           # Step 1: Install Newman
           - name: Install Newman
             run: npm install -g newman
