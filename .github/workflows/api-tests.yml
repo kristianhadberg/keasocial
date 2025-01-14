@@ -28,6 +28,16 @@ jobs:
               MYSQL_PASSWORD: testpassword
 
         steps:
+        
+          - name: Setup Node.js
+            uses: actions/setup-node@v3
+            with:
+                node-version: '18'
+    
+          # Step 10: Install Newman
+          - name: Install Newman
+            run: npm install -g newman
+        
         # Step 1: Check out the code
           - name: Check out code
             uses: actions/checkout@v4
@@ -81,24 +91,6 @@ jobs:
               DATABASE_USER: testuser
               DATABASE_PASSWORD: testpassword
               DATABASE_NAME: keasocial
-
-          - name: Debug Runner Environment
-            run: |
-                which curl || echo "curl not installed"
-                which tar || echo "tar not installed"
-                which apt-get || echo "apt-get not available"
-                uname -a
-                cat /etc/os-release    
-  
-                # Step 9: Set up Node.js for Newman
-          - name: Setup Node.js
-            uses: actions/setup-node@v3
-            with:
-                node-version: '18'
-    
-          # Step 10: Install Newman
-          - name: Install Newman
-            run: npm install -g newman
     
           # Step 11: Run Postman Collection with Newman
           - name: Run API Tests
