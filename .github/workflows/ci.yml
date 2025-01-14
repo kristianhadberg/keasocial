@@ -5,6 +5,7 @@ on:
         branches: ["integration_test_ci"]
     pull_request:
         branches: ["integration_test_ci"]
+    workflow_dispatch:
 
 jobs:
     build:
@@ -23,6 +24,25 @@ jobs:
               with:
                   dotnet-version: 8.0.x
 
+            - name: Create appsettings.json
+            run: |
+              echo '{
+                "Logging": {
+                  "LogLevel": {
+                    "Default": "Information",
+                    "Microsoft.AspNetCore": "Warning"
+                  }
+                },
+                "ConnectionStrings": {
+                  "WeatherApiConnection": "${{ secrets.WEATHER_API_KEY }}"
+                },
+                "Jwt": {
+                  "Key": "${{ secrets.JWT_KEY }}",
+                  "Issuer": "https://localhost",
+                  "Audience": "keasocial"
+                }
+              }' > appsettings.json
+
             # Step 3: Restore dependencies
             - name: Restore dependencies
               run: dotnet restore
@@ -33,7 +53,7 @@ jobs:
 
             # Step 7: Run tests with code coverage
             - name: Test with Coverage
-              run: dotnet test --no-build --filter "Category!=Integration" --collect:"XPlat Code Coverage" --verbosity normal --results-directory TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+              run: dotnet test --no-build --collect:"XPlat Code Coverage" --verbosity normal --results-directory TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
             # Step 9: Upload Code Coverage Report
             - name: Upload Coverage Report
