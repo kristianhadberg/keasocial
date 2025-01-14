@@ -62,7 +62,7 @@ jobs:
 
       # Step 7: Run database migrations
       - name: Run Migrations
-        run: dotnet ef database update --project keasocial/keasocial.csproj
+        run: dotnet ef database update 20241113122952_InitialCreate --project keasocial/keasocial.csproj
         env:
           DATABASE_HOST: localhost
           DATABASE_PORT: 3306
