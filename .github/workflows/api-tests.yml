@@ -28,40 +28,35 @@ jobs:
               MYSQL_PASSWORD: testpassword
 
         steps:
-        
-          - name: Setup Node.js
-            uses: actions/setup-node@v3
-            with:
-                node-version: '18'
     
-          # Step 10: Install Newman
+          # Step 1: Install Newman
           - name: Install Newman
             run: npm install -g newman
         
-        # Step 1: Check out the code
+        # Step 2: Check out the code
           - name: Check out code
             uses: actions/checkout@v4
   
-        # Step 2: Set up .NET
+        # Step 3: Set up .NET
           - name: Setup .NET
             uses: actions/setup-dotnet@v4
             with:
               dotnet-version: 8.0.x
   
-        # Step 3: Restore dependencies
+        # Step 4: Restore dependencies
           - name: Restore dependencies
             run: dotnet restore
   
-        # Step 4: Install dotnet-ef Tool
+        # Step 5: Install dotnet-ef Tool
           - name: Install dotnet-ef
             run: dotnet tool install --global dotnet-ef
   
-        # Step 5: Add .NET Tools to PATH
+        # Step 6: Add .NET Tools to PATH
           - name: Add .NET Tools to PATH
             shell: bash
             run: echo "PATH=\$PATH:~/.dotnet/tools" >> $GITHUB_ENV
   
-        # Step 6: Wait for the Database
+        # Step 7: Wait for the Database
           - name: Wait for Database
             run: |
                 for i in {1..30}; do
@@ -70,7 +65,7 @@ jobs:
                   sleep 5
                 done
   
-        # Step 7: Run database migrations
+        # Step 8: Run database migrations
           - name: Run Migrations
             run: dotnet ef database update 20241113122952_InitialCreate --project keasocial/keasocial.csproj
             env:
@@ -80,7 +75,7 @@ jobs:
               DATABASE_PASSWORD: testpassword
               DATABASE_NAME: keasocial
   
-        # Step 8: Run the API server in the background
+        # Step 9: Run the API server in the background
           - name: Run API Server
             run: |
                 dotnet run --project keasocial/keasocial.csproj --urls http://localhost:5260 &
@@ -92,7 +87,7 @@ jobs:
               DATABASE_PASSWORD: testpassword
               DATABASE_NAME: keasocial
     
-          # Step 11: Run Postman Collection with Newman
+          # Step 10: Run Postman Collection with Newman
           - name: Run API Tests
             run: |
                   newman run keasocial.Tests/postman/Keasocial.postman_collection.json \
@@ -101,7 +96,7 @@ jobs:
                   --reporter-junit-export TestResults/newman-api-tests.xml
   
   
-        # Step 12: Upload API Test Results
+        # Step 11: Upload API Test Results
           - name: Upload API Test Results
             if: always()
             uses: actions/upload-artifact@v3
