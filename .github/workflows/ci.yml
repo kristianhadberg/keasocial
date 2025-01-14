@@ -25,23 +25,23 @@ jobs:
                   dotnet-version: 8.0.x
 
             - name: Create appsettings.json
-            run: |
-              echo '{
-                "Logging": {
-                  "LogLevel": {
-                    "Default": "Information",
-                    "Microsoft.AspNetCore": "Warning"
-                  }
-                },
-                "ConnectionStrings": {
-                  "WeatherApiConnection": "${{ secrets.WEATHER_API_KEY }}"
-                },
-                "Jwt": {
-                  "Key": "${{ secrets.JWT_KEY }}",
-                  "Issuer": "https://localhost",
-                  "Audience": "keasocial"
-                }
-              }' > appsettings.json
+              run: |
+                  echo '{
+                    "Logging": {
+                      "LogLevel": {
+                        "Default": "Information",
+                        "Microsoft.AspNetCore": "Warning"
+                      }
+                    },
+                    "ConnectionStrings": {
+                      "WeatherApiConnection": "${{ secrets.WEATHER_API_KEY }}"
+                    },
+                    "Jwt": {
+                      "Key": "${{ secrets.JWT_KEY }}",
+                      "Issuer": "https://localhost",
+                      "Audience": "keasocial"
+                    }
+                  }' > appsettings.json
 
             # Step 3: Restore dependencies
             - name: Restore dependencies
