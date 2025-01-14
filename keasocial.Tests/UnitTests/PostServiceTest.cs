@@ -186,6 +186,7 @@ public class PostServiceTest
     [Fact]
     public async Task DeleteAsync_ValidUserIdAndPostId_DeletesPost()
     {
+        //arrange
         var postId = 1;
         var userId = 1;
 
@@ -193,9 +194,11 @@ public class PostServiceTest
 
         _postRepositoryMock.Setup(repo => repo.GetAsync(postId)).ReturnsAsync(post);
         _postRepositoryMock.Setup(repo => repo.DeleteAsync(postId)).ReturnsAsync(post);
-
+        
+        //act
         var result = _postService.DeleteAsync(userId, postId);
 
+        //assert
         Assert.NotNull(result);
         Assert.Equal(postId, result.Id);
     }

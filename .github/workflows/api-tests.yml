@@ -2,9 +2,9 @@ name: API Tests
 
 on:
   push:
-    branches: ["master"]
+    branches: ["Lasse"]
   pull_request:
-    branches: ["master"]
+    branches: ["Lasse"]
   workflow_dispatch:
 
 jobs:
