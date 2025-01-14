@@ -46,7 +46,7 @@ jobs:
 
             # Step 7: Run tests with code coverage
             - name: Test with Coverage
-              run: dotnet test --no-build --filter "Category!=Integration & Category!=Selenium" --collect:"XPlat Code Coverage" --verbosity normal --results-directory TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+              run: dotnet test --no-build --filter "Category!=Integration & Category!=Selenium" --collect:"XPlat Code Coverage" --verbosity normal --results-directory TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover /p:CoverletOutputFormat=opencover /p:CoverletBranchCoverage=true
 
             # Step 8: End SonarCloud Analysis
             - name: SonarCloud End
