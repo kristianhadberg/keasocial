@@ -8,7 +8,7 @@ appsettings.Production.json
 appsettings.Staging.json
 config.json
 keasocial.sln.DotSettings.user
-
+.env
 ### DotnetCore ###
 # .NET Core build folders
 bin/

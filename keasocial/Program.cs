@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using DotNetEnv;
 
 public class Program
 {
@@ -41,12 +42,22 @@ public class Program
         {
             loggingBuilder.AddConsole(); // Log EF Core queries to the console
         });
-
+        
+        if (File.Exists(".env"))
+        {
+            DotNetEnv.Env.Load();
+        }
+        
         builder.Services.AddDbContext<KeasocialDbContext>(options =>
         {
-            options.UseMySql(
-                    builder.Configuration.GetConnectionString("DefaultConnection"), 
-                    new MySqlServerVersion(new Version(9, 1, 0))
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
+                                   $"Server={Environment.GetEnvironmentVariable("DATABASE_HOST")};" +
+                                   $"Port={Environment.GetEnvironmentVariable("DATABASE_PORT")};" +
+                                   $"Database={Environment.GetEnvironmentVariable("DATABASE_NAME")};" +
+                                   $"User={Environment.GetEnvironmentVariable("DATABASE_USER")};" +
+                                   $"Password={Environment.GetEnvironmentVariable("DATABASE_PASSWORD")};";
+            
+            options.UseMySql(connectionString,new MySqlServerVersion(new Version(9, 1, 0))
                 )
                 .UseLoggerFactory(loggerFactory)          // Attach logging factory
                 .EnableSensitiveDataLogging()             // Show parameter values in logs
