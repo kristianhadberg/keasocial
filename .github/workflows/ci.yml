@@ -38,7 +38,7 @@ jobs:
                     },
                     "Jwt": {
                       "Key": "${{ secrets.JWT_KEY }}",
-                      "Issuer": "https://localhost",
+                      "Issuer": "https://localhost:5000/",
                       "Audience": "keasocial"
                     }
                   }' > appsettings.json
