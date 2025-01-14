@@ -1,115 +1,103 @@
 name: API Tests
 
 on:
-  push:
-    branches: ["Lasse"]
-  pull_request:
-    branches: ["Lasse"]
-  workflow_dispatch:
+    push:
+      branches: ["Lasse"]
+    pull_request:
+      branches: ["Lasse"]
+    workflow_dispatch:
 
 jobs:
-  api-tests:
-    runs-on: ubuntu-latest
+    api-tests:
+        runs-on: ubuntu-latest
 
-    services:
-      db:
-        image: mysql:8.0
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: keasocial
-          MYSQL_USER: testuser
-          MYSQL_PASSWORD: testpassword
+        services:
+          db:
+            image: mysql:8.0
+            ports:
+              - 3306:3306
+            options: >-
+              --health-cmd="mysqladmin ping --silent"
+              --health-interval=10s
+              --health-timeout=5s
+              --health-retries=3
+            env:
+              MYSQL_ROOT_PASSWORD: root
+              MYSQL_DATABASE: keasocial
+              MYSQL_USER: testuser
+              MYSQL_PASSWORD: testpassword
 
-    steps:
-      # Step 1: Check out the code
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      # Step 2: Set up .NET
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-
-      # Step 3: Restore dependencies
-      - name: Restore dependencies
-        run: dotnet restore
-
-      # Step 4: Install dotnet-ef Tool
-      - name: Install dotnet-ef
-        run: dotnet tool install --global dotnet-ef
-
-      # Step 5: Add .NET Tools to PATH
-      - name: Add .NET Tools to PATH
-        shell: bash
-        run: echo "PATH=\$PATH:~/.dotnet/tools" >> $GITHUB_ENV
-
-      # Step 6: Wait for the Database
-      - name: Wait for Database
-        run: |
-          for i in {1..30}; do
-            echo > /dev/tcp/localhost/3306 && break
-            echo "Waiting for database..."
-            sleep 5
-          done
-
-      # Step 7: Run database migrations
-      - name: Run Migrations
-        run: dotnet ef database update 20241113122952_InitialCreate --project keasocial/keasocial.csproj
-        env:
-          DATABASE_HOST: localhost
-          DATABASE_PORT: 3306
-          DATABASE_USER: testuser
-          DATABASE_PASSWORD: testpassword
-          DATABASE_NAME: keasocial
-
-      # Step 8: Run the API server in the background
-      - name: Run API Server
-        run: |
-          dotnet run --project keasocial/keasocial.csproj --urls http://localhost:5260 &
-        env:
-          ASPNETCORE_URLS: http://localhost:5260
-          DATABASE_HOST: localhost
-          DATABASE_PORT: 3306
-          DATABASE_USER: testuser
-          DATABASE_PASSWORD: testpassword
-          DATABASE_NAME: keasocial
-
-      # Step 9: Install necessary tools
-      - name: Install necessary tools
-        run: |
-          apt-get update
-          apt-get install -y curl bash
-      
-      # Step 9: Set up Node.js for Newman
-      - name: Install Node.js manually
-        run: |
-          curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
-          apt-get install -y nodejs
-
-      # Step 10: Install Newman
-      - name: Install Newman
-        run: npm install -g newman
-
-      # Step 11: Run Postman Collection with Newman
-      - name: Run API Tests
-        run: |
-          newman run keasocial.Tests/postman/Keasocial.postman_collection.json \
-          --environment keasocial.Tests/postman/keasocial.postman_environment.json \
-          --reporters cli,junit \
-          --reporter-junit-export TestResults/newman-api-tests.xml
-
-      # Step 12: Upload API Test Results
-      - name: Upload API Test Results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: api-test-results
-          path: TestResults/newman-api-tests.xml
+        steps:
+        # Step 1: Check out the code
+          - name: Check out code
+            uses: actions/checkout@v4
+  
+        # Step 2: Set up .NET
+          - name: Setup .NET
+            uses: actions/setup-dotnet@v4
+            with:
+              dotnet-version: 8.0.x
+  
+        # Step 3: Restore dependencies
+          - name: Restore dependencies
+            run: dotnet restore
+  
+        # Step 4: Install dotnet-ef Tool
+          - name: Install dotnet-ef
+            run: dotnet tool install --global dotnet-ef
+  
+        # Step 5: Add .NET Tools to PATH
+          - name: Add .NET Tools to PATH
+            shell: bash
+            run: echo "PATH=\$PATH:~/.dotnet/tools" >> $GITHUB_ENV
+  
+        # Step 6: Wait for the Database
+          - name: Wait for Database
+            run: |
+                for i in {1..30}; do
+                  echo > /dev/tcp/localhost/3306 && break
+                  echo "Waiting for database..."
+                  sleep 5
+                done
+  
+        # Step 7: Run database migrations
+          - name: Run Migrations
+            run: dotnet ef database update 20241113122952_InitialCreate --project keasocial/keasocial.csproj
+            env:
+              DATABASE_HOST: localhost
+              DATABASE_PORT: 3306
+              DATABASE_USER: testuser
+              DATABASE_PASSWORD: testpassword
+              DATABASE_NAME: keasocial
+  
+        # Step 8: Run the API server in the background
+          - name: Run API Server
+            run: |
+                dotnet run --project keasocial/keasocial.csproj --urls http://localhost:5260 &
+            env:
+              ASPNETCORE_URLS: http://localhost:5260
+              DATABASE_HOST: localhost
+              DATABASE_PORT: 3306
+              DATABASE_USER: testuser
+              DATABASE_PASSWORD: testpassword
+              DATABASE_NAME: keasocial
+  
+          - name: Run API Tests in Docker
+            uses: docker://node:16
+            with:
+              args: |
+                sh -c "
+                npm install -g newman &&
+                newman run keasocial.Tests/postman/Keasocial.postman_collection.json \
+                  --environment keasocial.Tests/postman/keasocial.postman_environment.json \
+                  --reporters cli,junit \
+                  --reporter-junit-export TestResults/newman-api-tests.xml"
+  
+  
+        # Step 12: Upload API Test Results
+          - name: Upload API Test Results
+            if: always()
+            uses: actions/upload-artifact@v3
+            with:
+              name: api-test-results
+              path: TestResults/newman-api-tests.xml
