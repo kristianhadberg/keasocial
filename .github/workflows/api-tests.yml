@@ -83,10 +83,10 @@ jobs:
           DATABASE_NAME: keasocial
 
       # Step 9: Set up Node.js for Newman
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
+      - name: Install Node.js manually
+        run: |
+          curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+          apt-get install -y nodejs
 
       # Step 10: Install Newman
       - name: Install Newman
