@@ -194,10 +194,10 @@ public class PostServiceTest
         _postRepositoryMock.Setup(repo => repo.GetAsync(postId)).ReturnsAsync(post);
         _postRepositoryMock.Setup(repo => repo.DeleteAsync(postId)).ReturnsAsync(post);
 
-        var result = _postService.DeleteAsync(userId, postId);
+        var result =  _postService.DeleteAsync(userId, postId); // this is missing an await
 
         Assert.NotNull(result);
-        Assert.Equal(postId, result.Id);
+        Assert.Equal(postId, result.Id); // Should be result.PostId
     }
     
     [Fact]
