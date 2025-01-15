@@ -7,6 +7,7 @@ using keasocial.Models;
 namespace keasocial.Tests.IntegrationTests;
 
 [Trait("Category", "Integration")]
+// dotnet test --filter "Category=Integration" to run all integration tests
 public class PostControllerTest : IntegrationTestSetup
 {
     [Fact]
